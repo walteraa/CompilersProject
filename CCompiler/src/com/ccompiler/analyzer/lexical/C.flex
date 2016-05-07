@@ -11,6 +11,7 @@ import com.ccompiler.analyzer.syntactical.sym;
 %line
 %column
 %cup
+%cupdebug
 
 
 %{

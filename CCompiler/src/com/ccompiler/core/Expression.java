@@ -1,4 +1,4 @@
-package com.ccompile.core;
+package com.ccompiler.core;
 
 import com.ccompiler.util.SemanticException;
 

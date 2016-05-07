@@ -4,8 +4,8 @@ package com.ccompiler.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ccompile.core.Expression;
-import com.ccompile.core.Type;
+import com.ccompiler.core.Expression;
+import com.ccompiler.core.Type;
 
 public class Util {
 	

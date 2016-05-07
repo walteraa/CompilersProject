@@ -1,4 +1,4 @@
-package com.ccompile.core;
+package com.ccompiler.core;
 
 /**
  * C Type<br>

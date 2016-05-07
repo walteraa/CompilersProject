@@ -6,16 +6,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import com.ccompile.core.Expression;
-import com.ccompile.core.Function;
-import com.ccompile.core.Identifier;
-import com.ccompile.core.IfElse;
-import com.ccompile.core.Operation;
-import com.ccompile.core.Program;
-import com.ccompile.core.ScopedEntity;
-import com.ccompile.core.Type;
-import com.ccompile.core.Variable;
 import com.ccompiler.analyzer.syntactical.Parser;
+import com.ccompiler.core.Expression;
+import com.ccompiler.core.Function;
+import com.ccompiler.core.Identifier;
+import com.ccompiler.core.IfElse;
+import com.ccompiler.core.Operation;
+import com.ccompiler.core.Program;
+import com.ccompiler.core.ScopedEntity;
+import com.ccompiler.core.Type;
+import com.ccompiler.core.Variable;
 
 
 public class SemanticAnalysis {

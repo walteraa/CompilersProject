@@ -1,6 +1,7 @@
 package com.ccompiler.analyzer.lexical;
 
 import java_cup.runtime.*;
+import com.ccompiler.analyzer.syntactical.sym;
 
 %%
 
@@ -60,6 +61,7 @@ O =  [0-7]
 D = [0-9]
 NZ = [1-9]
 L = [a-zA-Z_]
+A =  [a-zA-Z_0-9]
 H = [a-fA-F0-9]
 HP = (0[xX])
 E = [Ee][+-]?{D}+
@@ -84,51 +86,31 @@ Comments = {LineComment} | {BlockComment}
 LineComment = "//" {InputCharacter}* {LineTerminator}?
 BlockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/" 
 
-/* Identifier */
-/* Identifier = [:jletter:][:jletterdigit:]* */
-
-/*-*
- * Aqui definiremos os padr›es de defini�‹o:
- */
 letter          = [A-Za-z]
 L               = [a-zA-Z_]
 digit           = [0-9]
 alphanumeric    = {letter}|{digit}
 other_id_char   = [_]
 identifier      = {letter}({alphanumeric}|{other_id_char})*
-/* integer         = {digit}* */
-
 
 %%
 
 <YYINITIAL> {
 
     /* Keywords */
-
-    "_Static_assert"        { return symbol(sym.STATIC_ASSERT); }
-    "default"               { return symbol(sym.DEFAULT); }
-    "_Alignas"              { return symbol(sym.ALIGNAS); }
-	"_Alignof"              { return symbol(sym.ALIGNOF); }
-	"_Atomic"               { return symbol(sym.ATOMIC); }
-    "extern"                { return symbol(sym.EXTERN); }
-    "sizeof"                { return symbol(sym.SIZEOF); }
-    "_Bool"                 { return symbol(sym.BOOL); }
-	"_Complex"              { return symbol(COMPLEX); }
-	"_Generic"              { return symbol(GENERIC); }
-	"_Imaginary"            { return symbol(IMAGINARY); }
-	"_Noreturn"             { return symbol(NORETURN); }
-	"_Thread_local"         { return symbol(THREAD_LOCAL); }
-	"__func__"              { return symbol(FUNC_NAME); }
 	
+	"auto"                  { return symbol(sym.AUTO, new String(yytext())); }	
     "break"                 { return symbol(sym.BREAK, new String(yytext())); }
-    "auto"                  { return symbol(sym.AUTO, new String(yytext())); }
     "case"                  { return symbol(sym.CASE, new String(yytext())); }
     "char"                  { return symbol(sym.CHAR, new String(yytext())); }
-    "continue"              { return symbol(sym.CONTINUE, new String(yytext())); }
+    "const"                 { return symbol(sym.CONST, new String(yytext())); }
+	"continue"              { return symbol(sym.CONTINUE, new String(yytext())); }
+	"default"               { return symbol(sym.DEFAULT, new String(yytext())); }
     "do"                    { return symbol(sym.DO, new String(yytext())); }
     "double"                { return symbol(sym.DOUBLE, new String(yytext())); }
     "else"                  { return symbol(sym.ELSE, new String(yytext())); }
 	"enum"					{ return symbol(sym.ENUM, new String(yytext())); }
+	"extern"                { return symbol(sym.EXTERN, new String(yytext())); }
     "float"                 { return symbol(sym.FLOAT, new String(yytext())); }
     "for"                   { return symbol(sym.FOR, new String(yytext())); }
     "goto"                  { return symbol(sym.GOTO, new String(yytext())); }
@@ -141,125 +123,99 @@ identifier      = {letter}({alphanumeric}|{other_id_char})*
     "return"                { return symbol(sym.RETURN, new String(yytext())); }
     "short"                 { return symbol(sym.SHORT, new String(yytext())); }
     "signed"                { return symbol(sym.SIGNED, new String(yytext())); }
+	"sizeof"                { return symbol(sym.SIZEOF, new String(yytext())); }
     "static"                { return symbol(sym.STATIC, new String(yytext())); }
-    "switch"                { return symbol(sym.SWITCH, new String(yytext())); }
+	"struct"                { return symbol(sym.STRUCT, new String(yytext())); }    
+	"switch"                { return symbol(sym.SWITCH, new String(yytext())); }
     "typedef"               { return symbol(sym.TYPEDEF, new String(yytext())); }
-    "unsigned"              { return symbol(sym.UNSIGNED, new String(yytext())); }
+    "union"                 { return symbol(sym.UNION, new String(yytext())); }
+	"unsigned"              { return symbol(sym.UNSIGNED, new String(yytext())); }
     "void"                  { return symbol(sym.VOID, new String(yytext())); }
-    "while"                 { return symbol(sym.WHILE, new String(yytext())); }
+    "volatile"              { return symbol(sym.VOLATILE, new String(yytext())); }
+	"while"                 { return symbol(sym.WHILE, new String(yytext())); }
+	"_Alignas"              { return symbol(sym.ALIGNAS); }
+	"_Alignof"              { return symbol(sym.ALIGNOF); }
+	"_Atomic"               { return symbol(sym.ATOMIC); }
+    "_Bool"                 { return symbol(sym.BOOL); }
+	"_Complex"              { return symbol(sym.COMPLEX); }
+	"_Generic"              { return symbol(sym.GENERIC); }
+	"_Imaginary"            { return symbol(sym.IMAGINARY); }
+	"_Noreturn"             { return symbol(sym.NORETURN); }
+	"_Static_assert"        { return symbol(sym.STATIC_ASSERT); }
+	"_Thread_local"         { return symbol(sym.THREAD_LOCAL); }
+	"__func__"              { return symbol(sym.FUNC_NAME); }
+    
+	{L}{A}*					{ /**return check_type();*/ }
+	
+	{HP}{H}+{IS}?					{ return symbol(sym.I_CONSTANT , new String(yytext())); }
+	{NZ}{D}*{IS}?					{ return symbol(sym.I_CONSTANT , new String(yytext())); }
+	"0"{O}*{IS}?					{ return symbol(sym.I_CONSTANT , new String(yytext())); }
+	{CP}?"'"([^'\\\n]|{ES})+"'"		{ return symbol(sym.I_CONSTANT , new String(yytext())); }
 
-    /* Class Definition */
-
-    "struct"                { return symbol(sym.STRUCT); }
-    "union"                 { return symbol(sym.UNION); }
-
-    /* Qualifiers */
-
-    "volatile"              { return symbol(sym.VOLATILE); }
-    "const"                 { return symbol(sym.CONST); }
-
-    /* Unary Operators */
-
-    "!"                     { return symbol(sym.LOGNEGATION); }
-    "++"                    { return symbol(sym.AUTOINCRM); }
-    "--"                    { return symbol(sym.AUTODECRM); }
+	{D}+{E}{FS}?				{ return symbol(sym.F_CONSTANT , new String(yytext())); }
+	{D}*"."{D}+{E}?{FS}?		{ return symbol(sym.F_CONSTANT , new String(yytext())); }
+	{D}+"."{E}?{FS}?			{ return symbol(sym.F_CONSTANT , new String(yytext())); }
+	{HP}{H}+{P}{FS}?			{ return symbol(sym.F_CONSTANT , new String(yytext())); }
+	{HP}{H}*"."{H}+{P}{FS}?		{ return symbol(sym.F_CONSTANT , new String(yytext())); }
+	{HP}{H}+"."{P}{FS}?			{ return symbol(sym.F_CONSTANT , new String(yytext())); }
+	
+	({SP}?\"([^\"\\\n]|{ES})*\"{WS}*)+	{ return symbol(sym.STRING_LITERAL); }
+	
+	"..."                   { return symbol(sym.ELLIPSIS); }
+	">>="                   { return symbol(sym.RIGHT_ASSIGN, new String(yytext())); }
+    "<<="                   { return symbol(sym.LEFT_ASSIGN, new String(yytext())); }
+    "+="                    { return symbol(sym.ADD_ASSIGN, new String(yytext())); }
+    "-="                    { return symbol(sym.SUB_ASSIGN, new String(yytext())); }
+    "*="                    { return symbol(sym.MUL_ASSIGN, new String(yytext())); }
+    "/="                    { return symbol(sym.DIV_ASSIGN,  new String(yytext())); }
+    "%="                    { return symbol(sym.MOD_ASSIGN, new String(yytext())); }
+    "&="                    { return symbol(sym.AND_ASSIGN, new String(yytext())); }
+    "^="                    { return symbol(sym.XOR_ASSIGN, new String(yytext())); }
+    "|="                    { return symbol(sym.OR_ASSIGN, new String(yytext())); }
+    ">>"                    { return symbol(sym.RIGHT_OP, new String(yytext())); }	
+	"<<"                    { return symbol(sym.LEFT_OP, new String(yytext())); }
+	"++"                    { return symbol(sym.INC_OP, new String(yytext())); }
+    "--"                    { return symbol(sym.DEC_OP, new String(yytext())); }
+	"->"                    { return symbol(sym.PTR_OP, new String(yytext())); }
+	"&&"                    { return symbol(sym.AND_OP, new String(yytext())); }
+	"||"                    { return symbol(sym.OR_OP, new String(yytext())); }
+	"<="                    { return symbol(sym.LE_OP, new String(yytext())); }
+    ">="                    { return symbol(sym.GE_OP, new String(yytext())); }
+    "=="                    { return symbol(sym.EQ_OP, new String(yytext())); }
+	"!="                    { return symbol(sym.NE_OP, new String(yytext())); }
+	
+	"="                     { return symbol(sym.ASSIGNMENT); }
+	"!"                     { return symbol(sym.LOGNEGATION); }
     "~"                     { return symbol(sym.BINNEG); }
-
-    /* Assignment */
-
-    ">>="                   { return symbol(sym.RSHIFTASSIGN, new String(yytext())); }
-    "<<="                   { return symbol(sym.LSHIFTASSIGN, new String(yytext())); }
-    "-="                    { return symbol(sym.MINUSASSIGN, new String(yytext())); }
-    "="                     { return symbol(sym.ASSIGNMENT, new String(yytext())); }
-    "+="                    { return symbol(sym.PLUSASSIGN, new String(yytext())); }
-    "*="                    { return symbol(sym.MULTASSIGN); }
-    "/="                    { return symbol(sym.DIVASSIGN); }
-    "%="                    { return symbol(sym.MODASSIGN); }
-    "&="                    { return symbol(sym.ANDASSIGN); }
-    "^="                    { return symbol(sym.XORASSIGN); }
-    "|="                    { return symbol(sym.ORASSIGN); }
-
-    /* Shift Operators */
-
-    "<<"                    { return symbol(sym.LSHIFT); }
-    ">>"                    { return symbol(sym.RSHIFT); }
-
-    /* Relational and Logical Operators */
-
-    "^"                     { return symbol(sym.XOROP, new String(yytext())); }
-    "||"                    { return symbol(sym.OROP, new String(yytext())); }
-    "|"                     { return symbol(sym.SOROP, new String(yytext())); }
-    "!="                    { return symbol(sym.NEQOP, new String(yytext())); }
-    "=="                    { return symbol(sym.EQOP, new String(yytext())); }
-    "<="                    { return symbol(sym.LTE, new String(yytext())); }
-    ">="                    { return symbol(sym.GTE, new String(yytext())); }
-    "<"                     { return symbol(sym.LT, new String(yytext())); }
-    ">"                     { return symbol(sym.GT, new String(yytext())); }
-
-    /* Arithmetic Operators */
-
+    "^"                     { return symbol(sym.XOROP); }
+    "|"                     { return symbol(sym.SOROP); }
+    "<"                     { return symbol(sym.LT); }
+    ">"                     { return symbol(sym.GT); }
     "-"                     { return symbol(sym.MINUSOP); }
     "+"                     { return symbol(sym.PLUSOP); }
     "/"                     { return symbol(sym.DIVOP); }
     "%"                     { return symbol(sym.MODOP); }
-
-    /* Overloaded Lexemes */
-
-    "&&"                    { return symbol(sym.DOUBLEAND); }
     "&"                     { return symbol(sym.SINGLEAND); }
     "*"                     { return symbol(sym.STAR); }
-
-    /* Separators */
-
-    ";"                     { return symbol(sym.SEMICOLON, new String(yytext())); }
+    ";"                     { return symbol(sym.SEMICOLON); }
     "?"                     { return symbol(sym.QUESTION); }
-    "["                     { return symbol(sym.LSQRBRK); }
-    "]"                     { return symbol(sym.RSQRBRK); }
-    "::"                    { return symbol(sym.SEPPTR); }
+    ("["|"<:")              { return symbol(sym.LSQRBRK); }
+    ("]"|":>")              { return symbol(sym.RSQRBRK); }
     ","                     { return symbol(sym.COMMA); }
-    "->"                    { return symbol(sym.ARROW); }
     ":"                     { return symbol(sym.COLON); }
-    "}"                     { return symbol(sym.RBRK, new String(yytext())); }
-    "{"                     { return symbol(sym.LBRK, new String(yytext())); }
-    "("                     { return symbol(sym.LPAR, new String(yytext())); }
-    ")"                     { return symbol(sym.RPAR, new String(yytext())); }
-    "."                     { return symbol(sym.DOT, new String(yytext())); }
--
+    ("}"|"%>")              { return symbol(sym.RBRK); }
+    ("{"|"<%")              { return symbol(sym.LBRK); }
+    "("                     { return symbol(sym.LPAR); }
+    ")"                     { return symbol(sym.RPAR); }
+    "."                     { return symbol(sym.DOT); }
+
     /* Others */
-
-    "..."                   { return symbol(sym.DOTS); }
-
-     \"([^\\\"]|\\.)*\"     { return symbol(sym.STRING_LITERAL, new String(yytext())); }
-
-    {identifier}            { return symbol(sym.IDENTIFIER, new String(yytext())); }
-
-    {D}+{IS}?       		{ return symbol(sym.INTEGER, new String(yytext())); }
-	/**{L}{A}*					{ return check_type(); }*/
-	
-	("["|"<:")				{ return '['; }
-	("]"|":>")				{ return ']'; }
-	("{"|"<%")				{ return '{'; }
-	("}"|"%>")				{ return '}'; }
-
-	{HP}{H}+{IS}?					{ return I_CONSTANT; }
-	{NZ}{D}*{IS}?					{ return I_CONSTANT; }
-	"0"{O}*{IS}?					{ return I_CONSTANT; }
-	{CP}?"'"([^'\\\n]|{ES})+"'"		{ return I_CONSTANT; }
-
-	{D}+{E}{FS}?				{ return F_CONSTANT; }
-	{D}*"."{D}+{E}?{FS}?		{ return F_CONSTANT; }
-	{D}+"."{E}?{FS}?			{ return F_CONSTANT; }
-	{HP}{H}+{P}{FS}?			{ return F_CONSTANT; }
-	{HP}{H}*"."{H}+{P}{FS}?		{ return F_CONSTANT; }
-	{HP}{H}+"."{P}{FS}?			{ return F_CONSTANT; }
+    {identifier}            { return symbol(sym.IDENTIFIER, new String(yytext())); }	
 
     {BlankSpace}            { /* skip it */ }
     {Comments}              { /* skip it */ }
 	{WS}+					{ /* whitespace separates tokens */ }
-	.							{ /* discard bad characters */ }
-
-
-
+	.						{ /* discard bad characters */ }
 }
 
 /* Input not matched */

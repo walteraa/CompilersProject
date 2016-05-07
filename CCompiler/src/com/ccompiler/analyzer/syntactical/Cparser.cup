@@ -1,0 +1,588 @@
+package com.ccompiler.analyzer.syntactical;
+import java_cup.runtime.*;
+
+init with {: SemanticAnalysis.parser = this;              :};
+
+parser code {:
+    
+    public void report_error(String message, Object info) {
+   
+        StringBuffer m = new StringBuffer("Error");
+   
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {
+                /* Add to the end of the StringBuffer error message
+                   the line number of the error in the input. */
+                m.append(" in line "+(s.left+1));   
+                /* Check if the column number in the input is greater
+                   or equal to zero. */
+                if (s.right >= 0)                    
+                    /* Add to the end of the StringBuffer error message
+                       the column number of the error in the input. */
+                    m.append(", column "+(s.right+1));
+            }
+        }
+   
+
+        m.append(" : "+message);
+        System.err.println(m);
+    }
+
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+:};
+
+/**
+ * Terminals
+ */
+ 
+terminal	IDENTIFIER, I_CONSTANT, F_CONSTANT, STRING_LITERAL, FUNC_NAME, SIZEOF;
+terminal	PTR_OP, INC_OP, DEC_OP, LEFT_OP, RIGHT_OP, LE_OP, GE_OP, EQ_OP, NE_OP;
+terminal	AND_OP, OR_OP, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN, ADD_ASSIGN;
+terminal	SUB_ASSIGN, LEFT_ASSIGN, RIGHT_ASSIGN, AND_ASSIGN;
+terminal	XOR_ASSIGN, OR_ASSIGN;
+terminal	TYPEDEF_NAME, ENUMERATION_CONSTANT;
+
+terminal	TYPEDEF, EXTERN, STATIC, AUTO, REGISTER, INLINE;
+terminal	CONST, RESTRICT, VOLATILE;
+terminal	BOOL, CHAR, SHORT, INT, LONG, SIGNED, UNSIGNED, FLOAT, DOUBLE, VOID;
+terminal	COMPLEX, IMAGINARY; 
+terminal	STRUCT, UNION, ENUM, ELLIPSIS;
+
+terminal	CASE, DEFAULT, IF, ELSE, SWITCH, WHILE, DO, FOR, GOTO, CONTINUE, BREAK, RETURN;
+
+terminal	ALIGNAS, ALIGNOF, ATOMIC, GENERIC, NORETURN, STATIC_ASSERT, THREAD_LOCAL;
+
+/**Terminals added**/
+terminal COMMA, DOT, STAR, LSQRBRK, RSQRBRK, LT, GT, QUESTION, SEMICOLON, COLON, LPAR, RPAR, LBRK, RBRK;
+terminal SINGLEAND, SOROP, XOROP, ASSIGNMENT, PLUSOP, LOGNEGATION, MINUSOP, BINNEG, MODOP, DIVOP;
+
+/**
+ * Non Terminals
+ */
+ 
+non terminal primary_expression, constant, enumeration_constant, string, generic_selection, generic_assoc_list;
+non terminal generic_association, postfix_expression, argument_expression_list, unary_expression, unary_operator;
+non terminal cast_expression, multiplicative_expression, additive_expression, shift_expression, relational_expression;
+non terminal equality_expression, and_expression, exclusive_or_expression, inclusive_or_expression, logical_and_expression;
+non terminal logical_or_expression, conditional_expression, assignment_expression, assignment_operator, expression;
+non terminal constant_expression, declaration, declaration_specifiers, init_declarator_list, init_declarator;
+non terminal storage_class_specifier, type_specifier, struct_or_union_specifier, struct_or_union, struct_declaration_list;
+non terminal struct_declaration, specifier_qualifier_list, struct_declarator_list, struct_declarator, enum_specifier;
+non terminal enumerator_list, enumerator, atomic_type_specifier, type_qualifier, function_specifier, alignment_specifier;
+non terminal declarator, direct_declarator, pointer, type_qualifier_list, parameter_type_list, parameter_list, parameter_declaration;
+non terminal identifier_list, type_name, abstract_declarator, direct_abstract_declarator, initializer, initializer_list;
+non terminal designation, designator_list, designator, static_assert_declaration, statement, labeled_statement, compound_statement;
+non terminal block_item_list, block_item, expression_statement, selection_statement, iteration_statement, jump_statement, translation_unit;
+non terminal external_declaration, function_definition, declaration_list;
+
+start with translation_unit;
+
+primary_expression
+	::= IDENTIFIER
+	| constant
+	| string
+	| LPAR expression RPAR
+	| generic_selection
+	;
+
+constant
+	::= I_CONSTANT		/* includes character_constant */
+	| F_CONSTANT
+	| ENUMERATION_CONSTANT	/* after it has been defined as such */
+	;
+
+enumeration_constant		/* before it has been defined as such */
+	::= IDENTIFIER
+	;
+
+string
+	::= STRING_LITERAL
+	| FUNC_NAME
+	;
+
+generic_selection
+	::= GENERIC LPAR assignment_expression COMMA generic_assoc_list RPAR
+	;
+
+generic_assoc_list
+	::= generic_association
+	| generic_assoc_list COMMA generic_association
+	;
+
+generic_association
+	::= type_name COLON assignment_expression
+	| DEFAULT COLON assignment_expression
+	;
+
+postfix_expression
+	::= primary_expression
+	| postfix_expression LSQRBRK expression RSQRBRK
+	| postfix_expression LPAR RPAR
+	| postfix_expression LPAR argument_expression_list RPAR
+	| postfix_expression DOT IDENTIFIER
+	| postfix_expression PTR_OP IDENTIFIER
+	| postfix_expression INC_OP
+	| postfix_expression DEC_OP
+	| LPAR type_name RPAR LBRK initializer_list RBRK
+	| LPAR type_name RPAR LBRK initializer_list COMMA RBRK
+	;
+
+argument_expression_list
+	::= assignment_expression
+	| argument_expression_list COMMA assignment_expression
+	;
+
+unary_expression
+	::= postfix_expression
+	| INC_OP unary_expression
+	| DEC_OP unary_expression
+	| unary_operator cast_expression
+	| SIZEOF unary_expression
+	| SIZEOF LPAR type_name RPAR
+	| ALIGNOF LPAR type_name RPAR
+	;
+
+unary_operator
+	::= SINGLEAND
+	| STAR
+	| PLUSOP
+	| MINUSOP
+	| BINNEG
+	| LOGNEGATION
+	;
+
+cast_expression
+	::= unary_expression
+	| LPAR type_name RPAR cast_expression
+	;
+
+multiplicative_expression
+	::= cast_expression
+	| multiplicative_expression STAR cast_expression
+	| multiplicative_expression DIVOP cast_expression
+	| multiplicative_expression MODOP cast_expression
+	;
+
+additive_expression
+	::= multiplicative_expression
+	| additive_expression PLUSOP multiplicative_expression
+	| additive_expression MINUSOP multiplicative_expression
+	;
+
+shift_expression
+	::= additive_expression
+	| shift_expression LEFT_OP additive_expression
+	| shift_expression RIGHT_OP additive_expression
+	;
+
+relational_expression
+	::= shift_expression
+	| relational_expression LT shift_expression
+	| relational_expression GT shift_expression
+	| relational_expression LE_OP shift_expression
+	| relational_expression GE_OP shift_expression
+	;
+
+equality_expression
+	::= relational_expression
+	| equality_expression EQ_OP relational_expression
+	| equality_expression NE_OP relational_expression
+	;
+
+and_expression
+	::= equality_expression
+	| and_expression SINGLEAND equality_expression
+	;
+
+exclusive_or_expression
+	::= and_expression
+	| exclusive_or_expression XOROP and_expression
+	;
+
+inclusive_or_expression
+	::= exclusive_or_expression
+	| inclusive_or_expression SOROP exclusive_or_expression
+	;
+
+logical_and_expression
+	::= inclusive_or_expression
+	| logical_and_expression AND_OP inclusive_or_expression
+	;
+
+logical_or_expression
+	::= logical_and_expression
+	| logical_or_expression OR_OP logical_and_expression
+	;
+
+conditional_expression
+	::= logical_or_expression
+	| logical_or_expression QUESTION expression COLON conditional_expression
+	;
+
+assignment_expression
+	::= conditional_expression
+	| unary_expression assignment_operator assignment_expression
+	;
+
+assignment_operator
+	::= ASSIGNMENT
+	| MUL_ASSIGN
+	| DIV_ASSIGN
+	| MOD_ASSIGN
+	| ADD_ASSIGN
+	| SUB_ASSIGN
+	| LEFT_ASSIGN
+	| RIGHT_ASSIGN
+	| AND_ASSIGN
+	| XOR_ASSIGN
+	| OR_ASSIGN
+	;
+
+expression
+	::= assignment_expression
+	| expression COMMA assignment_expression
+	;
+
+constant_expression
+	::= conditional_expression	/* with constraints */
+	;
+
+declaration
+	::= declaration_specifiers SEMICOLON
+	| declaration_specifiers init_declarator_list SEMICOLON
+	| static_assert_declaration
+	;
+
+declaration_specifiers
+	::= storage_class_specifier declaration_specifiers
+	| storage_class_specifier
+	| type_specifier declaration_specifiers
+	| type_specifier
+	| type_qualifier declaration_specifiers
+	| type_qualifier
+	| function_specifier declaration_specifiers
+	| function_specifier
+	| alignment_specifier declaration_specifiers
+	| alignment_specifier
+	;
+
+init_declarator_list
+	::= init_declarator
+	| init_declarator_list COMMA init_declarator
+	;
+
+init_declarator
+	::= declarator ASSIGNMENT initializer
+	| declarator
+	;
+
+storage_class_specifier
+	::= TYPEDEF	/* identifiers must be flagged as TYPEDEF_NAME */
+	| EXTERN
+	| STATIC
+	| THREAD_LOCAL
+	| AUTO
+	| REGISTER
+	;
+
+type_specifier
+	::= VOID
+	| CHAR
+	| SHORT
+	| INT
+	| LONG
+	| FLOAT
+	| DOUBLE
+	| SIGNED
+	| UNSIGNED
+	| BOOL
+	| COMPLEX
+	| IMAGINARY	  	/* non-mandated extension */
+	| atomic_type_specifier
+	| struct_or_union_specifier
+	| enum_specifier
+	| TYPEDEF_NAME		/* after it has been defined as such */
+	;
+
+struct_or_union_specifier
+	::= struct_or_union LBRK struct_declaration_list RBRK
+	| struct_or_union IDENTIFIER LBRK struct_declaration_list RBRK
+	| struct_or_union IDENTIFIER
+	;
+
+struct_or_union
+	::= STRUCT
+	| UNION
+	;
+
+struct_declaration_list
+	::= struct_declaration
+	| struct_declaration_list struct_declaration
+	;
+
+struct_declaration
+	::= specifier_qualifier_list SEMICOLON	/* for anonymous struct/union */
+	| specifier_qualifier_list struct_declarator_list SEMICOLON
+	| static_assert_declaration
+	;
+
+specifier_qualifier_list
+	::= type_specifier specifier_qualifier_list
+	| type_specifier
+	| type_qualifier specifier_qualifier_list
+	| type_qualifier
+	;
+
+struct_declarator_list
+	::= struct_declarator
+	| struct_declarator_list COMMA struct_declarator
+	;
+
+struct_declarator
+	::= COLON constant_expression
+	| declarator COLON constant_expression
+	| declarator
+	;
+
+enum_specifier
+	::= ENUM LBRK enumerator_list RBRK
+	| ENUM LBRK enumerator_list COMMA RBRK
+	| ENUM IDENTIFIER LBRK enumerator_list RBRK
+	| ENUM IDENTIFIER LBRK enumerator_list COMMA RBRK
+	| ENUM IDENTIFIER
+	;
+
+enumerator_list
+	::= enumerator
+	| enumerator_list COMMA enumerator
+	;
+
+enumerator	/* identifiers must be flagged as ENUMERATION_CONSTANT */
+	::= enumeration_constant ASSIGNMENT constant_expression
+	| enumeration_constant
+	;
+
+atomic_type_specifier
+	::= ATOMIC LPAR type_name RPAR
+	;
+
+type_qualifier
+	::= CONST
+	| RESTRICT
+	| VOLATILE
+	| ATOMIC
+	;
+
+function_specifier
+	::= INLINE
+	| NORETURN
+	;
+
+alignment_specifier
+	::= ALIGNAS LPAR type_name RPAR
+	| ALIGNAS LPAR constant_expression RPAR
+	;
+
+declarator
+	::= pointer direct_declarator
+	| direct_declarator
+	;
+
+direct_declarator
+	::= IDENTIFIER
+	| LPAR declarator RPAR
+	| direct_declarator LSQRBRK RSQRBRK
+	| direct_declarator LSQRBRK STAR RSQRBRK
+	| direct_declarator LSQRBRK STATIC type_qualifier_list assignment_expression RSQRBRK
+	| direct_declarator LSQRBRK STATIC assignment_expression RSQRBRK
+	| direct_declarator LSQRBRK type_qualifier_list STAR RSQRBRK
+	| direct_declarator LSQRBRK type_qualifier_list STATIC assignment_expression RSQRBRK
+	| direct_declarator LSQRBRK type_qualifier_list assignment_expression RSQRBRK
+	| direct_declarator LSQRBRK type_qualifier_list RSQRBRK
+	| direct_declarator LSQRBRK assignment_expression RSQRBRK
+	| direct_declarator LPAR parameter_type_list RPAR
+	| direct_declarator LPAR RPAR
+	| direct_declarator LPAR identifier_list RPAR
+	;
+
+pointer
+	::= STAR type_qualifier_list pointer
+	| STAR type_qualifier_list
+	| STAR pointer
+	| STAR
+	;
+
+type_qualifier_list
+	::= type_qualifier
+	| type_qualifier_list type_qualifier
+	;
+
+
+parameter_type_list
+	::= parameter_list COMMA ELLIPSIS
+	| parameter_list
+	;
+
+parameter_list
+	::= parameter_declaration
+	| parameter_list COMMA parameter_declaration
+	;
+
+parameter_declaration
+	::= declaration_specifiers declarator
+	| declaration_specifiers abstract_declarator
+	| declaration_specifiers
+	;
+
+identifier_list
+	::= IDENTIFIER
+	| identifier_list COMMA IDENTIFIER
+	;
+
+type_name
+	::= specifier_qualifier_list abstract_declarator
+	| specifier_qualifier_list
+	;
+
+abstract_declarator
+	::= pointer direct_abstract_declarator
+	| pointer
+	| direct_abstract_declarator
+	;
+
+direct_abstract_declarator
+	::= LPAR abstract_declarator RPAR
+	| LSQRBRK RSQRBRK
+	| LSQRBRK STAR RSQRBRK
+	| LSQRBRK STATIC type_qualifier_list assignment_expression RSQRBRK
+	| LSQRBRK STATIC assignment_expression RSQRBRK
+	| LSQRBRK type_qualifier_list STATIC assignment_expression RSQRBRK
+	| LSQRBRK type_qualifier_list assignment_expression RSQRBRK
+	| LSQRBRK type_qualifier_list RSQRBRK
+	| LSQRBRK assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK RSQRBRK
+	| direct_abstract_declarator LSQRBRK STAR RSQRBRK
+	| direct_abstract_declarator LSQRBRK STATIC type_qualifier_list assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK STATIC assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK type_qualifier_list assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK type_qualifier_list STATIC assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK type_qualifier_list RSQRBRK
+	| direct_abstract_declarator LSQRBRK assignment_expression RSQRBRK
+	| LPAR RPAR
+	| LPAR parameter_type_list RPAR
+	| direct_abstract_declarator LPAR RPAR
+	| direct_abstract_declarator LPAR parameter_type_list RPAR
+	;
+
+initializer
+	::= LBRK initializer_list RBRK
+	| LBRK initializer_list COMMA RBRK
+	| assignment_expression
+	;
+
+initializer_list
+	::= designation initializer
+	| initializer
+	| initializer_list COMMA designation initializer
+	| initializer_list COMMA initializer
+	;
+
+designation
+	::= designator_list ASSIGNMENT
+	;
+
+designator_list
+	::= designator
+	| designator_list designator
+	;
+
+designator
+	::= LSQRBRK constant_expression RSQRBRK
+	| DOT IDENTIFIER
+	;
+
+static_assert_declaration
+	::= STATIC_ASSERT LPAR constant_expression COMMA STRING_LITERAL RPAR SEMICOLON
+	;
+
+statement
+	::= labeled_statement
+	| compound_statement
+	| expression_statement
+	| selection_statement
+	| iteration_statement
+	| jump_statement
+	;
+
+labeled_statement
+	::= IDENTIFIER COLON statement
+	| CASE constant_expression COLON statement
+	| DEFAULT COLON statement
+	;
+
+compound_statement
+	::= LBRK RBRK
+	| LBRK  block_item_list RBRK
+	;
+
+block_item_list
+	::= block_item
+	| block_item_list block_item
+	;
+
+block_item
+	::= declaration
+	| statement
+	;
+
+expression_statement
+	::= SEMICOLON
+	| expression SEMICOLON
+	;
+
+selection_statement
+	::= IF LPAR expression RPAR statement ELSE statement
+	| IF LPAR expression RPAR statement
+	| SWITCH LPAR expression RPAR statement
+	;
+
+iteration_statement
+	::= WHILE LPAR expression RPAR statement
+	| DO statement WHILE LPAR expression RPAR SEMICOLON
+	| FOR LPAR expression_statement expression_statement RPAR statement
+	| FOR LPAR expression_statement expression_statement expression RPAR statement
+	| FOR LPAR declaration expression_statement RPAR statement
+	| FOR LPAR declaration expression_statement expression RPAR statement
+	;
+
+jump_statement
+	::= GOTO IDENTIFIER SEMICOLON
+	| CONTINUE SEMICOLON
+	| BREAK SEMICOLON
+	| RETURN SEMICOLON
+	| RETURN expression SEMICOLON
+	;
+
+translation_unit
+	::= external_declaration
+	| translation_unit external_declaration
+	;
+
+external_declaration
+	::= function_definition
+	| declaration
+	;
+
+function_definition
+	::= declaration_specifiers declarator declaration_list compound_statement
+	| declaration_specifiers declarator compound_statement
+	;
+
+declaration_list
+	::= declaration
+	| declaration_list declaration
+	;

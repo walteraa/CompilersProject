@@ -85,14 +85,14 @@ BlankSpace = {LineTerminator} | [ \t\f]
 
 Comments = {LineComment} | {BlockComment}
 LineComment = "//" {InputCharacter}* {LineTerminator}?
-BlockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/" 
+BlockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 
 letter          = [A-Za-z]
 L               = [a-zA-Z_]
 digit           = [0-9]
 alphanumeric    = {letter}|{digit}
 other_id_char   = [_]
-identifier      = {letter}({alphanumeric}|{other_id_char})*
+identifier      = {letter}({alphanumeric})* 
 
 %%
 
@@ -209,10 +209,9 @@ identifier      = {letter}({alphanumeric}|{other_id_char})*
     "("                     { return symbol(sym.LPAR); }
     ")"                     { return symbol(sym.RPAR); }
     "."                     { return symbol(sym.DOT); }
-
+-
     /* Others */
     {identifier}            { return symbol(sym.IDENTIFIER, new String(yytext())); }	
-
     {BlankSpace}            { /* skip it */ }
     {Comments}              { /* skip it */ }
 	{WS}+					{ /* whitespace separates tokens */ }

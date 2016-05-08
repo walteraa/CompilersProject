@@ -74,25 +74,12 @@ SP = (u8|u|U|L)
 ES = (\\([\'\"\?\\abfnrtv]|[0-7]{1,3}|x[a-fA-F0-9]+))
 WS = [ \t\v\n\f]
 
-Comment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
-
 LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
-
 BlankSpace = {LineTerminator} | [ \t\f]
-
-/* Comments */
-
 Comments = {LineComment} | {BlockComment}
 LineComment = "//" {InputCharacter}* {LineTerminator}?
 BlockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
-
-letter          = [A-Za-z]
-L               = [a-zA-Z_]
-digit           = [0-9]
-alphanumeric    = {letter}|{digit}
-other_id_char   = [_]
-identifier      = {letter}({alphanumeric})* 
 
 %%
 
@@ -145,8 +132,8 @@ identifier      = {letter}({alphanumeric})*
 	"_Static_assert"        { return symbol(sym.STATIC_ASSERT); }
 	"_Thread_local"         { return symbol(sym.THREAD_LOCAL); }
 	"__func__"              { return symbol(sym.FUNC_NAME); }
-    
-	{L}{A}*					{ /**return check_type();*/ }
+							
+	{L}{A}*					{ return symbol(sym.IDENTIFIER, new String(yytext())); }
 	
 	{HP}{H}+{IS}?					{ return symbol(sym.I_CONSTANT , new String(yytext())); }
 	{NZ}{D}*{IS}?					{ return symbol(sym.I_CONSTANT , new String(yytext())); }
@@ -211,7 +198,7 @@ identifier      = {letter}({alphanumeric})*
     "."                     { return symbol(sym.DOT); }
 -
     /* Others */
-    {identifier}            { return symbol(sym.IDENTIFIER, new String(yytext())); }	
+    {WS}           			{ /* skip it */ }	
     {BlankSpace}            { /* skip it */ }
     {Comments}              { /* skip it */ }
 	{WS}+					{ /* whitespace separates tokens */ }
@@ -220,4 +207,3 @@ identifier      = {letter}({alphanumeric})*
 
 /* Input not matched */
 [^] { reportError(yyline+1, "Illegal character \"" + yytext() + "\""); }
-

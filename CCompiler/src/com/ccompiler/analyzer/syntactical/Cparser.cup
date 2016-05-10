@@ -1,5 +1,7 @@
 package com.ccompiler.analyzer.syntactical;
 import java_cup.runtime.*;
+import com.ccompiler.util.*;
+import com.ccompiler.core.*;
 
 init with {: SemanticAnalysis.parser = this;              :};
 
@@ -229,17 +231,17 @@ assignment_expression
 	;
 
 assignment_operator
-	::= ASSIGNMENT
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	::= ASSIGNMENT		{: RESULT = new Node("=", "primario");  Logger.print("=");:}
+	| MUL_ASSIGN		{: RESULT = new Node("*=", "primario"); Logger.print("*=");:}
+	| DIV_ASSIGN		{: RESULT = new Node("/=", "primario"); Logger.print("/=");:}
+	| MOD_ASSIGN		{: RESULT = new Node("%=", "primario"); Logger.print("%=");:}
+	| ADD_ASSIGN		{: RESULT = new Node("+=", "primario"); Logger.print("+=");:}
+	| SUB_ASSIGN		{: RESULT = new Node("-=", "primario"); Logger.print("-=");:}
+	| LEFT_ASSIGN		{: RESULT = new Node("<<=","primario"); Logger.print("<<=");:}
+	| RIGHT_ASSIGN		{: RESULT = new Node(">>=","primario"); Logger.print(">>=");:} 
+	| AND_ASSIGN		{: RESULT = new Node("&=", "primario"); Logger.print("&=");:} 
+	| XOR_ASSIGN		{: RESULT = new Node("^=", "primario"); Logger.print("^=");:}
+	| OR_ASSIGN			
 	;
 
 expression
@@ -252,8 +254,8 @@ constant_expression
 	;
 
 declaration
-	::= declaration_specifiers SEMICOLON
-	| declaration_specifiers init_declarator_list SEMICOLON
+	::= declaration_specifiers:d SEMICOLON
+	| declaration_specifiers:d init_declarator_list:i SEMICOLON {: Logger.print("Declaration ok");  ((Variable) i).setType((Type) d); SemanticAnalysis.getInstance().addVariable((Variable) i); RESULT = i; :} 
 	| static_assert_declaration
 	;
 
@@ -276,7 +278,7 @@ init_declarator_list
 	;
 
 init_declarator
-	::= declarator ASSIGNMENT initializer
+	::= declarator:d ASSIGNMENT initializer:i {:  Logger.print("226 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; SemanticAnalysis.getInstance().toAssembly(SemanticAnalysis.labels+8+": ST " + d + ", " + (ex.getValue() == null ? "R1" : ex.getValue())); SemanticAnalysis.labels= SemanticAnalysis.labels+8; v.setValue(ex); RESULT = v; :}
 	| declarator
 	;
 
@@ -291,16 +293,16 @@ storage_class_specifier
 
 type_specifier
 	::= VOID
-	| CHAR
-	| SHORT
-	| INT
-	| LONG
-	| FLOAT
-	| DOUBLE
-	| SIGNED
-	| UNSIGNED
-	| BOOL
-	| COMPLEX
+	| CHAR		{: RESULT = new Type("char"); Logger.print("char"); :}
+	| SHORT		{: RESULT = new Type("short"); Logger.print("short"); :}	
+	| INT		{: RESULT = new Type("int"); Logger.print("int"); :}
+	| LONG		{: RESULT = new Type("long"); Logger.print("long"); :}
+	| FLOAT		{: RESULT = new Type("float"); Logger.print("float"); :}
+	| DOUBLE	{: RESULT = new Type("double"); Logger.print("double"); :}
+	| SIGNED	{: RESULT = new Type("signed"); Logger.print("signed"); :}
+	| UNSIGNED	{: RESULT = new Type("unsigned"); Logger.print("unsigned"); :}
+	| BOOL		{: RESULT = new Type("bool"); Logger.print("bool"); :}
+	| COMPLEX	{: RESULT = new Type("complex"); Logger.print("complex"); :}
 	| IMAGINARY	  	/* non-mandated extension */
 	| atomic_type_specifier
 	| struct_or_union_specifier

@@ -1,7 +1,10 @@
 package com.ccompiler.analyzer.syntactical;
+
 import java_cup.runtime.*;
 import com.ccompiler.util.*;
 import com.ccompiler.core.*;
+import java.util.ArrayList;
+import java.util.List;
 
 init with {: SemanticAnalysis.parser = this;              :};
 
@@ -140,7 +143,7 @@ argument_expression_list
 
 unary_expression
 	::= postfix_expression
-	| INC_OP unary_expression
+	| INC_OP unary_expression				{: Logger.print("143 (++) unary_expression"); :}
 	| DEC_OP unary_expression
 	| unary_operator cast_expression
 	| SIZEOF unary_expression
@@ -255,7 +258,7 @@ constant_expression
 
 declaration
 	::= declaration_specifiers:d SEMICOLON
-	| declaration_specifiers:d init_declarator_list:i SEMICOLON {: Logger.print("Declaration ok");  ((Variable) i).setType((Type) d); SemanticAnalysis.getInstance().addVariable((Variable) i); RESULT = i; :} 
+	| declaration_specifiers:d init_declarator_list:i SEMICOLON 		/**{: Logger.print("Declaration ok");  ((Variable) i).setType((Type) d); SemanticAnalysis.getInstance().addVariable((Variable) i); RESULT = i; :} */
 	| static_assert_declaration
 	;
 
@@ -278,7 +281,7 @@ init_declarator_list
 	;
 
 init_declarator
-	::= declarator:d ASSIGNMENT initializer:i {:  Logger.print("226 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; SemanticAnalysis.getInstance().toAssembly(SemanticAnalysis.labels+8+": ST " + d + ", " + (ex.getValue() == null ? "R1" : ex.getValue())); SemanticAnalysis.labels= SemanticAnalysis.labels+8; v.setValue(ex); RESULT = v; :}
+	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("226 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; SemanticAnalysis.getInstance().toAssembly(SemanticAnalysis.labels+8+": ST " + d + ", " + (ex.getValue() == null ? "R1" : ex.getValue())); SemanticAnalysis.labels= SemanticAnalysis.labels+8; v.setValue(ex); RESULT = v; :}
 	| declarator
 	;
 
@@ -555,10 +558,10 @@ selection_statement
 iteration_statement
 	::= WHILE LPAR expression RPAR statement
 	| DO statement WHILE LPAR expression RPAR SEMICOLON
-	| FOR LPAR expression_statement expression_statement RPAR statement
-	| FOR LPAR expression_statement expression_statement expression RPAR statement
-	| FOR LPAR declaration expression_statement RPAR statement
-	| FOR LPAR declaration expression_statement expression RPAR statement
+	| FOR LPAR expression_statement expression_statement RPAR statement					{: Logger.print("561 FOR ITERATOR"); :}
+	| FOR LPAR expression_statement expression_statement expression RPAR statement		{: Logger.print("562 FOR ITERATOR"); :}
+	| FOR LPAR declaration expression_statement RPAR statement							{: Logger.print("563 FOR ITERATOR"); :}
+	| FOR LPAR declaration expression_statement expression RPAR statement				{: Logger.print("564 FOR ITERATOR"); :}
 	;
 
 jump_statement
@@ -570,8 +573,8 @@ jump_statement
 	;
 
 translation_unit
-	::= external_declaration
-	| translation_unit external_declaration
+	::= external_declaration 						{: Logger.print("573 translationUnit"); :}
+	| translation_unit external_declaration			{: Logger.print("574 translationUnit"); :}
 	;
 
 external_declaration

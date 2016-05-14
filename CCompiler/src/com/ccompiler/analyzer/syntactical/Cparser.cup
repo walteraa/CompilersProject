@@ -258,7 +258,7 @@ constant_expression
 
 declaration
 	::= declaration_specifiers:d SEMICOLON
-	| declaration_specifiers:d init_declarator_list:i SEMICOLON 		/**{: Logger.print("Declaration ok");  ((Variable) i).setType((Type) d); SemanticAnalysis.getInstance().addVariable((Variable) i); RESULT = i; :} */
+	| declaration_specifiers:d init_declarator_list:i SEMICOLON 		{: Logger.print("261 " + d + " " + i); ((Variable) i).setType((Type) d); SemanticAnalysis.getInstance().addVariable((Variable) i); RESULT = i; :}
 	| static_assert_declaration
 	;
 
@@ -266,7 +266,7 @@ declaration_specifiers
 	::= storage_class_specifier declaration_specifiers
 	| storage_class_specifier
 	| type_specifier declaration_specifiers
-	| type_specifier
+	| type_specifier:s 													{: Logger.print("269 simpleTypeSpec " + s); RESULT = s; :} 
 	| type_qualifier declaration_specifiers
 	| type_qualifier
 	| function_specifier declaration_specifiers
@@ -276,13 +276,13 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	::= init_declarator
-	| init_declarator_list COMMA init_declarator
+	::= init_declarator:i 									{: Logger.print("279 " + i); RESULT = i; :} 
+	| init_declarator_list:il COMMA init_declarator:id		{: Logger.print("280 " + il + " " + id); RESULT = il; :} 
 	;
 
 init_declarator
-	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("226 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; SemanticAnalysis.getInstance().toAssembly(SemanticAnalysis.labels+8+": ST " + d + ", " + (ex.getValue() == null ? "R1" : ex.getValue())); SemanticAnalysis.labels= SemanticAnalysis.labels+8; v.setValue(ex); RESULT = v; :}
-	| declarator
+	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; SemanticAnalysis.getInstance().toAssembly(SemanticAnalysis.labels+8+": ST " + d + ", " + (ex.getValue() == null ? "R1" : ex.getValue())); SemanticAnalysis.labels= SemanticAnalysis.labels+8; v.setValue(ex); RESULT = v; :}
+	| declarator:d										{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
 	;
 
 storage_class_specifier
@@ -296,16 +296,16 @@ storage_class_specifier
 
 type_specifier
 	::= VOID
-	| CHAR		{: RESULT = new Type("char"); Logger.print("char"); :}
-	| SHORT		{: RESULT = new Type("short"); Logger.print("short"); :}	
-	| INT		{: RESULT = new Type("int"); Logger.print("int"); :}
-	| LONG		{: RESULT = new Type("long"); Logger.print("long"); :}
-	| FLOAT		{: RESULT = new Type("float"); Logger.print("float"); :}
-	| DOUBLE	{: RESULT = new Type("double"); Logger.print("double"); :}
-	| SIGNED	{: RESULT = new Type("signed"); Logger.print("signed"); :}
-	| UNSIGNED	{: RESULT = new Type("unsigned"); Logger.print("unsigned"); :}
-	| BOOL		{: RESULT = new Type("bool"); Logger.print("bool"); :}
-	| COMPLEX	{: RESULT = new Type("complex"); Logger.print("complex"); :}
+	| CHAR		{: RESULT = new Type("char"); 			Logger.print("char"); :}
+	| SHORT		{: RESULT = new Type("short"); 			Logger.print("short"); :}	
+	| INT		{: RESULT = new Type("int"); 			Logger.print("int"); :}
+	| LONG		{: RESULT = new Type("long"); 			Logger.print("long"); :}
+	| FLOAT		{: RESULT = new Type("float"); 			Logger.print("float"); :}
+	| DOUBLE	{: RESULT = new Type("double"); 		Logger.print("double"); :}
+	| SIGNED	{: RESULT = new Type("signed"); 		Logger.print("signed"); :}
+	| UNSIGNED	{: RESULT = new Type("unsigned"); 		Logger.print("unsigned"); :}
+	| BOOL		{: RESULT = new Type("bool"); 			Logger.print("bool"); :}
+	| COMPLEX	{: RESULT = new Type("complex"); 		Logger.print("complex"); :}
 	| IMAGINARY	  	/* non-mandated extension */
 	| atomic_type_specifier
 	| struct_or_union_specifier
@@ -393,12 +393,12 @@ alignment_specifier
 	;
 
 declarator
-	::= pointer direct_declarator
-	| direct_declarator
+	::= pointer direct_declarator:p 					{: Logger.print("396" + p ); RESULT = p; :}
+	| direct_declarator:d								{: Logger.print("397 direct_declarator " + d ); RESULT = d; :}
 	;
 
 direct_declarator
-	::= IDENTIFIER
+	::= IDENTIFIER:d									{: Logger.print("401 IDENTIFIER " + d ); RESULT = d; :}
 	| LPAR declarator RPAR
 	| direct_declarator LSQRBRK RSQRBRK
 	| direct_declarator LSQRBRK STAR RSQRBRK

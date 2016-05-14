@@ -429,11 +429,11 @@ type_qualifier_list
 
 parameter_type_list
 	::= parameter_list COMMA ELLIPSIS
-	| parameter_list
+	| parameter_list: pl 											{: Logger.print("432 parameter_list " + pl ); RESULT = pl; :}														
 	;
 
 parameter_list
-	::= parameter_declaration
+	::= parameter_declaration:p 									{: Logger.print("436 parameter_declaration " + p ); RESULT = p; :}	
 	| parameter_list COMMA parameter_declaration
 	;
 

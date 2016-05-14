@@ -398,7 +398,7 @@ declarator
 	;
 
 direct_declarator
-	::= IDENTIFIER:d									{: Logger.print("401 IDENTIFIER " + d ); RESULT = d; :}
+	::= IDENTIFIER:d																				{: Logger.print("401 IDENTIFIER " + d ); RESULT = d; :}
 	| LPAR declarator RPAR
 	| direct_declarator LSQRBRK RSQRBRK
 	| direct_declarator LSQRBRK STAR RSQRBRK
@@ -409,9 +409,9 @@ direct_declarator
 	| direct_declarator LSQRBRK type_qualifier_list assignment_expression RSQRBRK
 	| direct_declarator LSQRBRK type_qualifier_list RSQRBRK
 	| direct_declarator LSQRBRK assignment_expression RSQRBRK
-	| direct_declarator LPAR parameter_type_list RPAR
-	| direct_declarator LPAR RPAR
-	| direct_declarator LPAR identifier_list RPAR
+	| direct_declarator:d LPAR parameter_type_list:p RPAR											{: Logger.print("412 direct_declarator " + d ); RESULT = new Function(d.toString(), (ArrayList<Parameter>) p); :}
+	| direct_declarator:d LPAR RPAR																	{: Logger.print("413 direct_declarator " + d ); RESULT = new Function(d.toString(), new ArrayList<Parameter>()); :}
+	| direct_declarator LPAR identifier_list RPAR													{: Logger.print("414 direct_declarator"); :}
 	;
 
 pointer
@@ -515,12 +515,12 @@ static_assert_declaration
 	;
 
 statement
-	::= labeled_statement
-	| compound_statement
-	| expression_statement
-	| selection_statement
-	| iteration_statement
-	| jump_statement
+	::= labeled_statement:s									{: RESULT = s; Logger.print("518 " + s); :}
+	| compound_statement:s									{: RESULT = s; Logger.print("519 " + s); :}
+	| expression_statement:s								{: RESULT = s; Logger.print("520 " + s); :}	
+	| selection_statement:s									{: RESULT = s; Logger.print("521 " + s); :}	
+	| iteration_statement:s									{: RESULT = s; Logger.print("522 " + s); :}
+	| jump_statement:s										{: RESULT = s; Logger.print("523 " + s); :}
 	;
 
 labeled_statement
@@ -531,17 +531,17 @@ labeled_statement
 
 compound_statement
 	::= LBRK RBRK
-	| LBRK  block_item_list RBRK
+	| LBRK  block_item_list:bi RBRK 						{: RESULT = bi;  Logger.print("534 block_item_list" + bi);:} 
 	;
 
 block_item_list
-	::= block_item
+	::= block_item:bi										{: RESULT = bi;  Logger.print("538 block_item " + bi);:}
 	| block_item_list block_item
 	;
 
 block_item
-	::= declaration
-	| statement
+	::= declaration:d 										{: RESULT = d;  Logger.print("543 " + d);:}
+	| statement:s											{: RESULT = s;  Logger.print("544 " + s);:}
 	;
 
 expression_statement
@@ -584,7 +584,7 @@ external_declaration
 
 function_definition
 	::= declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
+	| declaration_specifiers:d declarator:de {: Logger.print("pre-587 declSpec: " + d + " declarator: " + de); ((Function) de).setReturnType((Type) d); SemanticAnalysis.getInstance().addFunctionAndNewScope((Function) de); :} compound_statement:cs {: Logger.print("587 " + d + " " + cs);  SemanticAnalysis.getInstance().exitCurrentScope(); :}
 	;
 
 declaration_list

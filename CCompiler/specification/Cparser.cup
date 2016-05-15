@@ -6,7 +6,7 @@ import com.ccompiler.core.*;
 import java.util.ArrayList;
 import java.util.List;
 
-init with {: SemanticAnalysis.parser = this;              :};
+init with {: Semantic.parser = this;              :};
 
 parser code {:
     
@@ -87,7 +87,7 @@ non terminal external_declaration, function_definition, declaration_list;
 start with translation_unit;
 
 primary_expression
-	::= IDENTIFIER:i					{: RESULT = SemanticAnalysis.getInstance().getIdentifier((String) i);;  Logger.print("90 IDENTIFIER " + i); :}
+	::= IDENTIFIER:i					{: RESULT = Semantic.getInstance().getIdentifier((String) i);;  Logger.print("90 IDENTIFIER " + i); :}
 	| constant:c						{: RESULT = c;  Logger.print("91 constant " + c); :}
 	| string:s							{: RESULT = s;  Logger.print("92 string " + s); :}
 	| LPAR expression:e RPAR			{: RESULT = e;  Logger.print("93 expression " + e); :}
@@ -126,8 +126,8 @@ generic_association
 postfix_expression
 	::= primary_expression:p												{: Logger.print("127 " + p); RESULT = p; :}
 	| postfix_expression LSQRBRK expression:e RSQRBRK						{: Logger.print("128 " + e); :}
-	| postfix_expression:p LPAR RPAR										{: Logger.print("129 " + p); SemanticAnalysis.getInstance().isFunction(p); SemanticAnalysis.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
-	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("130 " + p + " " + i); SemanticAnalysis.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
+	| postfix_expression:p LPAR RPAR										{: Logger.print("129 " + p); Semantic.getInstance().isFunction(p); Semantic.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
+	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("130 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
 	| postfix_expression DOT IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
 	| postfix_expression:p INC_OP											{: Logger.print("133 postfix_expression: " + p); RESULT = p; :}
@@ -186,16 +186,16 @@ shift_expression
 
 relational_expression
 	::= shift_expression:s														{: Logger.print("188 " + s); RESULT = s; :}
-	| relational_expression:r LT shift_expression:s								{: Logger.print("189 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LESS_THAN, (Expression) r, (Expression) s); :}
-	| relational_expression:r GT shift_expression:s								{: Logger.print("190 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.MORE_THAN, (Expression) r, (Expression) s); :}
-	| relational_expression:r LE_OP shift_expression:s							{: Logger.print("191 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LE_OP, (Expression) r, (Expression) s); :}
-	| relational_expression:r GE_OP shift_expression:s							{: Logger.print("192 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.GE_OP, (Expression) r, (Expression) s); :}
+	| relational_expression:r LT shift_expression:s								{: Logger.print("189 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.LESS_THAN, (Expression) r, (Expression) s); :}
+	| relational_expression:r GT shift_expression:s								{: Logger.print("190 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.MORE_THAN, (Expression) r, (Expression) s); :}
+	| relational_expression:r LE_OP shift_expression:s							{: Logger.print("191 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.LE_OP, (Expression) r, (Expression) s); :}
+	| relational_expression:r GE_OP shift_expression:s							{: Logger.print("192 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.GE_OP, (Expression) r, (Expression) s); :}
 	;
 
 equality_expression
 	::= relational_expression:r													{: Logger.print("196 relational_expression:" + r); RESULT = r; :}
-	| equality_expression:e EQ_OP relational_expression:r						{: Logger.print("197 equality_expression: " + e + " " + r); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.EQ_OP, (Expression) e, (Expression) r); :}
-	| equality_expression:e NE_OP relational_expression:r						{: Logger.print("198 equality_expression: " + e + " " + r); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.NE_OP, (Expression) e, (Expression) r); :}
+	| equality_expression:e EQ_OP relational_expression:r						{: Logger.print("197 equality_expression: " + e + " " + r); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.EQ_OP, (Expression) e, (Expression) r); :}
+	| equality_expression:e NE_OP relational_expression:r						{: Logger.print("198 equality_expression: " + e + " " + r); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.NE_OP, (Expression) e, (Expression) r); :}
 	;
 
 and_expression
@@ -258,7 +258,7 @@ constant_expression
 
 declaration
 	::= declaration_specifiers:d SEMICOLON
-	| declaration_specifiers:d init_declarator_list:i SEMICOLON 		{: Logger.print("261 " + d + " " + i); ((Variable) i).setType((Type) d); SemanticAnalysis.getInstance().addVariable((Variable) i); RESULT = i; :}
+	| declaration_specifiers:d init_declarator_list:i SEMICOLON 		{: Logger.print("261 " + d + " " + i); ((Variable) i).setType((Type) d); Semantic.getInstance().addVariable((Variable) i); RESULT = i; :}
 	| static_assert_declaration
 	;
 
@@ -281,7 +281,7 @@ init_declarator_list
 	;
 
 init_declarator
-	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; SemanticAnalysis.getInstance().toAssembly(SemanticAnalysis.labels+8+": ST " + d + ", " + (ex.getValue() == null ? "R1" : ex.getValue())); SemanticAnalysis.labels= SemanticAnalysis.labels+8; v.setValue(ex); RESULT = v; :}
+	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; RESULT = v; :}
 	| declarator:d										{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
 	;
 
@@ -486,14 +486,14 @@ direct_abstract_declarator
 initializer
 	::= LBRK initializer_list RBRK
 	| LBRK initializer_list COMMA RBRK
-	| assignment_expression
+	| assignment_expression:a					{: Logger.print("489 assignment_expression: " + a); RESULT = a; :}
 	;
 
 initializer_list
 	::= designation initializer
-	| initializer
-	| initializer_list COMMA designation initializer
-	| initializer_list COMMA initializer
+	| initializer:i												{: Logger.print("494 initializer: " + i); RESULT = Util.newList((Expression) i); :}
+	| initializer_list COMMA designation initializer			{: Logger.print("495"); :}
+	| initializer_list:il COMMA initializer:i					{: Logger.print("496 initializer_list: " + il + " initializer: " + i); ((ArrayList<Expression>) il).add((Expression)i); RESULT = il; :}
 	;
 
 designation
@@ -569,7 +569,7 @@ jump_statement
 	| CONTINUE SEMICOLON					{: Logger.print("569 CONTINUE ;"); :} 
 	| BREAK SEMICOLON						{: Logger.print("570 BREAK ;"); :}
 	| RETURN SEMICOLON						{: Logger.print("571 BREAK ;"); :}
-	| RETURN expression:e SEMICOLON			{: Logger.print("572 RETURN EXPRESSION: " + e); SemanticAnalysis.getInstance().checkReturnedType(e); RESULT = e; :}
+	| RETURN expression:e SEMICOLON			{: Logger.print("572 RETURN EXPRESSION: " + e); Semantic.getInstance().checkReturnedType(e); RESULT = e; :}
 	;
 
 translation_unit
@@ -584,7 +584,7 @@ external_declaration
 
 function_definition
 	::= declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers:d declarator:de {: Logger.print("587 declaration_specifiers: " + d + " declarator: " + de); ((Function) de).setReturnType((Type) d); SemanticAnalysis.getInstance().addFunctionAndNewScope((Function) de); :} compound_statement:cs {: Logger.print("587 compound_statement: " + d + " " + cs);  SemanticAnalysis.getInstance().exitCurrentScope(); :}
+	| declaration_specifiers:d declarator:de {: Logger.print("587 declaration_specifiers: " + d + " declarator: " + de); ((Function) de).setReturnType((Type) d); Semantic.getInstance().addFunctionAndNewScope((Function) de); :} compound_statement:cs {: Logger.print("587 compound_statement: " + d + " " + cs);  Semantic.getInstance().exitCurrentScope(); :}
 	;
 
 declaration_list

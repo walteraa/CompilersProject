@@ -130,7 +130,7 @@ postfix_expression
 	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("130 " + p + " " + i); SemanticAnalysis.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
 	| postfix_expression DOT IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP
+	| postfix_expression:p INC_OP											{: Logger.print("133 postfix_expression: " + p); RESULT = p; :}
 	| postfix_expression DEC_OP
 	| LPAR type_name RPAR LBRK initializer_list RBRK
 	| LPAR type_name RPAR LBRK initializer_list COMMA RBRK
@@ -186,10 +186,10 @@ shift_expression
 
 relational_expression
 	::= shift_expression:s														{: Logger.print("188 " + s); RESULT = s; :}
-	| relational_expression:r LT shift_expression:s								{: Logger.print("189 " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LESS_THAN, (Expression) r, (Expression) s); :}
-	| relational_expression:r GT shift_expression:s								{: Logger.print("190 " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.MORE_THAN, (Expression) r, (Expression) s); :}
-	| relational_expression:r LE_OP shift_expression:s							{: Logger.print("191 " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LE_OP, (Expression) r, (Expression) s); :}
-	| relational_expression:r GE_OP shift_expression:s							{: Logger.print("192 " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.GE_OP, (Expression) r, (Expression) s); :}
+	| relational_expression:r LT shift_expression:s								{: Logger.print("189 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LESS_THAN, (Expression) r, (Expression) s); :}
+	| relational_expression:r GT shift_expression:s								{: Logger.print("190 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.MORE_THAN, (Expression) r, (Expression) s); :}
+	| relational_expression:r LE_OP shift_expression:s							{: Logger.print("191 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LE_OP, (Expression) r, (Expression) s); :}
+	| relational_expression:r GE_OP shift_expression:s							{: Logger.print("192 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.GE_OP, (Expression) r, (Expression) s); :}
 	;
 
 equality_expression

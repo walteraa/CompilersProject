@@ -48,7 +48,9 @@ public class Expression extends NamedEntity { // Not Really a named entity, but.
 	}
 	
 	public String toString() {
-//		return "{ Expression: " + getType() + " " + getValue() + "  }";
-		return getValue();
+		if (getValue() == null) {
+			return "{ Expression: " + getType() + "}";
+		}
+		return "{ Expression: " + getType() + " " + getValue() + "  }";
 	}
 }

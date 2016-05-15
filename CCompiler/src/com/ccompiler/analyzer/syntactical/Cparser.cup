@@ -531,12 +531,12 @@ labeled_statement
 
 compound_statement
 	::= LBRK RBRK
-	| LBRK  block_item_list:bi RBRK 						{: RESULT = bi;  Logger.print("534 block_item_list" + bi);:} 
+	| LBRK  block_item_list:bi RBRK 						{: RESULT = bi;  Logger.print("534 block_item_list: " + bi);:} 
 	;
 
 block_item_list
 	::= block_item:bi										{: RESULT = bi;  Logger.print("538 block_item " + bi);:}
-	| block_item_list block_item
+	| block_item_list block_item:bi							{: RESULT = bi;  Logger.print("539 block_item " + bi);:}
 	;
 
 block_item
@@ -566,10 +566,10 @@ iteration_statement
 
 jump_statement
 	::= GOTO IDENTIFIER SEMICOLON
-	| CONTINUE SEMICOLON
-	| BREAK SEMICOLON
-	| RETURN SEMICOLON
-	| RETURN expression SEMICOLON
+	| CONTINUE SEMICOLON					{: Logger.print("569 CONTINUE ;"); :} 
+	| BREAK SEMICOLON						{: Logger.print("570 BREAK ;"); :}
+	| RETURN SEMICOLON						{: Logger.print("571 BREAK ;"); :}
+	| RETURN expression:e SEMICOLON			{: Logger.print("572 RETURN EXPRESSION: " + e); SemanticAnalysis.getInstance().checkReturnedType(e); RESULT = e; :}
 	;
 
 translation_unit
@@ -584,7 +584,7 @@ external_declaration
 
 function_definition
 	::= declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers:d declarator:de {: Logger.print("pre-587 declSpec: " + d + " declarator: " + de); ((Function) de).setReturnType((Type) d); SemanticAnalysis.getInstance().addFunctionAndNewScope((Function) de); :} compound_statement:cs {: Logger.print("587 " + d + " " + cs);  SemanticAnalysis.getInstance().exitCurrentScope(); :}
+	| declaration_specifiers:d declarator:de {: Logger.print("587 declaration_specifiers: " + d + " declarator: " + de); ((Function) de).setReturnType((Type) d); SemanticAnalysis.getInstance().addFunctionAndNewScope((Function) de); :} compound_statement:cs {: Logger.print("587 compound_statement: " + d + " " + cs);  SemanticAnalysis.getInstance().exitCurrentScope(); :}
 	;
 
 declaration_list

@@ -87,7 +87,7 @@ non terminal external_declaration, function_definition, declaration_list;
 start with translation_unit;
 
 primary_expression
-	::= IDENTIFIER:i					{: RESULT = i;  Logger.print("90 IDENTIFIER " + i); :}
+	::= IDENTIFIER:i					{: RESULT = SemanticAnalysis.getInstance().getIdentifier((String) i);;  Logger.print("90 IDENTIFIER " + i); :}
 	| constant:c						{: RESULT = c;  Logger.print("91 constant " + c); :}
 	| string:s							{: RESULT = s;  Logger.print("92 string " + s); :}
 	| LPAR expression:e RPAR			{: RESULT = e;  Logger.print("93 expression " + e); :}
@@ -173,29 +173,29 @@ multiplicative_expression
 	;
 
 additive_expression
-	::= multiplicative_expression:m												{: Logger.print("176 " + m); RESULT = m; :}
-	| additive_expression PLUSOP multiplicative_expression
-	| additive_expression MINUSOP multiplicative_expression
+	::= multiplicative_expression:m												{: Logger.print("176 multiplicative_expression: " + m); RESULT = m; :}
+	| additive_expression PLUSOP multiplicative_expression						{: Logger.print("177 multiplicative_expression: "); :}
+	| additive_expression MINUSOP multiplicative_expression						{: Logger.print("178 multiplicative_expression: "); :}
 	;
 
 shift_expression
-	::= additive_expression:a													{: Logger.print("182 " + a); RESULT = a; :}
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
+	::= additive_expression:a													{: Logger.print("182 additive_expression: " + a); RESULT = a; :}
+	| shift_expression:s LEFT_OP additive_expression:a							{: Logger.print("183 shift_expression: " + s + " additive_expression: " + a); :}
+	| shift_expression:s RIGHT_OP additive_expression:a							{: Logger.print("184 shift_expression: " + s + " additive_expression: " + a); :}
 	;
 
 relational_expression
 	::= shift_expression:s														{: Logger.print("188 " + s); RESULT = s; :}
-	| relational_expression LT shift_expression
-	| relational_expression GT shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
+	| relational_expression:r LT shift_expression:s								{: Logger.print("189 " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LESS_THAN, (Expression) r, (Expression) s); :}
+	| relational_expression:r GT shift_expression:s								{: Logger.print("190 " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.MORE_THAN, (Expression) r, (Expression) s); :}
+	| relational_expression:r LE_OP shift_expression:s							{: Logger.print("191 " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LE_OP, (Expression) r, (Expression) s); :}
+	| relational_expression:r GE_OP shift_expression:s							{: Logger.print("192 " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.GE_OP, (Expression) r, (Expression) s); :}
 	;
 
 equality_expression
-	::= relational_expression:r													{: Logger.print("196 " + r); RESULT = r; :}
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	::= relational_expression:r													{: Logger.print("196 relational_expression:" + r); RESULT = r; :}
+	| equality_expression:e EQ_OP relational_expression:r						{: Logger.print("197 equality_expression: " + e + " " + r); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.EQ_OP, (Expression) e, (Expression) r); :}
+	| equality_expression:e NE_OP relational_expression:r						{: Logger.print("198 equality_expression: " + e + " " + r); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.NE_OP, (Expression) e, (Expression) r); :}
 	;
 
 and_expression
@@ -230,7 +230,7 @@ conditional_expression
 
 assignment_expression
 	::= conditional_expression:e												{: Logger.print("232 " + e); RESULT = e; :}
-	| unary_expression:u assignment_operator:o assignment_expression:e			{: Logger.print("233 unary_expression: " + u + " assignment_operator: " + o + " assignment_expression " + e); RESULT = e; :}
+	| unary_expression:u assignment_operator:o assignment_expression:e			{: Logger.print("233 unary_expression: " + u + " assignment_operator: " + o + " assignment_expression: " + e); RESULT = e; :}
 	;
 
 assignment_operator
@@ -248,7 +248,7 @@ assignment_operator
 	;
 
 expression
-	::= assignment_expression:a							{: Logger.print("251 assignment_expression " + a); RESULT = a; :}
+	::= assignment_expression:a							{: Logger.print("251 assignment_expression: " + a); RESULT = a; :}
 	| expression:e COMMA assignment_expression:a		{: Logger.print("252 expression: " + e + " assignment_expression: " + a); :} 
 	;
 

@@ -266,7 +266,7 @@ declaration_specifiers
 	::= storage_class_specifier declaration_specifiers
 	| storage_class_specifier
 	| type_specifier declaration_specifiers
-	| type_specifier:s 													{: Logger.print("269 simpleTypeSpec " + s); RESULT = s; :} 
+	| type_specifier:s 													{: Logger.print("269 type_specifier: " + s); RESULT = s; :} 
 	| type_qualifier declaration_specifiers
 	| type_qualifier
 	| function_specifier declaration_specifiers

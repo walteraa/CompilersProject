@@ -87,16 +87,16 @@ non terminal external_declaration, function_definition, declaration_list;
 start with translation_unit;
 
 primary_expression
-	::= IDENTIFIER
-	| constant
-	| string
-	| LPAR expression RPAR
-	| generic_selection
+	::= IDENTIFIER:i					{: RESULT = i;  Logger.print("90 IDENTIFIER " + i); :}
+	| constant:c						{: RESULT = c;  Logger.print("91 constant " + c); :}
+	| string:s							{: RESULT = s;  Logger.print("92 string " + s); :}
+	| LPAR expression:e RPAR			{: RESULT = e;  Logger.print("93 expression " + e); :}
+	| generic_selection:g 				{: RESULT = g;  Logger.print("94 generic_selection " + g); :}
 	;
 
 constant
-	::= I_CONSTANT		/* includes character_constant */
-	| F_CONSTANT
+	::= I_CONSTANT:i				{: Logger.print("98 " + i); RESULT = new Expression(new Type("int"), i.toString()); :}
+	| F_CONSTANT:f					{: Logger.print("99 " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
 	| ENUMERATION_CONSTANT	/* after it has been defined as such */
 	;
 
@@ -124,10 +124,10 @@ generic_association
 	;
 
 postfix_expression
-	::= primary_expression
-	| postfix_expression LSQRBRK expression RSQRBRK
-	| postfix_expression LPAR RPAR
-	| postfix_expression LPAR argument_expression_list RPAR
+	::= primary_expression:p												{: Logger.print("127 " + p); RESULT = p; :}
+	| postfix_expression LSQRBRK expression:e RSQRBRK						{: Logger.print("128 " + e); :}
+	| postfix_expression:p LPAR RPAR										{: Logger.print("129 " + p); SemanticAnalysis.getInstance().isFunction(p); SemanticAnalysis.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
+	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("130 " + p + " " + i); SemanticAnalysis.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
 	| postfix_expression DOT IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
 	| postfix_expression INC_OP
@@ -142,50 +142,50 @@ argument_expression_list
 	;
 
 unary_expression
-	::= postfix_expression
-	| INC_OP unary_expression				{: Logger.print("143 (++) unary_expression"); :}
-	| DEC_OP unary_expression
-	| unary_operator cast_expression
-	| SIZEOF unary_expression
-	| SIZEOF LPAR type_name RPAR
+	::= postfix_expression:p					{: Logger.print("145 " + p); RESULT = p; :} 
+	| INC_OP unary_expression:u					{: Logger.print("146 " + u); :}
+	| DEC_OP unary_expression:u					{: Logger.print("147 " + u ); :}
+	| unary_operator:u cast_expression:c 		{: Logger.print("148 " + u + " " + c); RESULT = c; :}
+	| SIZEOF unary_expression:u					{: Logger.print("149 " + u); RESULT = u; :}
+	| SIZEOF LPAR type_name:t RPAR				{: Logger.print("150 " + t); RESULT = t; :}
 	| ALIGNOF LPAR type_name RPAR
 	;
 
 unary_operator
-	::= SINGLEAND
-	| STAR
-	| PLUSOP
-	| MINUSOP
-	| BINNEG
-	| LOGNEGATION
+	::= SINGLEAND			{: RESULT = new Node("&", "primario"); Logger.print("&");:}
+	| STAR					{: RESULT = new Node("*", "primario"); Logger.print("*");:}
+	| PLUSOP				{: RESULT = new Node("+", "primario"); Logger.print("+");:}
+	| MINUSOP				{: RESULT = new Node("-", "primario"); Logger.print("-");:}
+	| BINNEG				{: RESULT = new Node("~", "primario"); Logger.print("~");:}
+	| LOGNEGATION			{: RESULT = new Node("!", "primario"); Logger.print("!");:}
 	;
 
 cast_expression
-	::= unary_expression
+	::= unary_expression:u														{: Logger.print("164 " + u); RESULT = u; :}
 	| LPAR type_name RPAR cast_expression
 	;
 
 multiplicative_expression
-	::= cast_expression
+	::= cast_expression:c														{: Logger.print("169 " + c); RESULT = c; :}
 	| multiplicative_expression STAR cast_expression
 	| multiplicative_expression DIVOP cast_expression
 	| multiplicative_expression MODOP cast_expression
 	;
 
 additive_expression
-	::= multiplicative_expression
+	::= multiplicative_expression:m												{: Logger.print("176 " + m); RESULT = m; :}
 	| additive_expression PLUSOP multiplicative_expression
 	| additive_expression MINUSOP multiplicative_expression
 	;
 
 shift_expression
-	::= additive_expression
+	::= additive_expression:a													{: Logger.print("182 " + a); RESULT = a; :}
 	| shift_expression LEFT_OP additive_expression
 	| shift_expression RIGHT_OP additive_expression
 	;
 
 relational_expression
-	::= shift_expression
+	::= shift_expression:s														{: Logger.print("188 " + s); RESULT = s; :}
 	| relational_expression LT shift_expression
 	| relational_expression GT shift_expression
 	| relational_expression LE_OP shift_expression
@@ -193,44 +193,44 @@ relational_expression
 	;
 
 equality_expression
-	::= relational_expression
+	::= relational_expression:r													{: Logger.print("196 " + r); RESULT = r; :}
 	| equality_expression EQ_OP relational_expression
 	| equality_expression NE_OP relational_expression
 	;
 
 and_expression
-	::= equality_expression
-	| and_expression SINGLEAND equality_expression
+	::= equality_expression:e													{: Logger.print("202 " + e); RESULT = e; :}
+	| and_expression SINGLEAND equality_expression								{: Logger.print("203"); :}
 	;
 
 exclusive_or_expression
-	::= and_expression
-	| exclusive_or_expression XOROP and_expression
+	::= and_expression:a														{: Logger.print("207 " + a); RESULT = a; :}
+	| exclusive_or_expression XOROP and_expression								{: Logger.print("208"); :}
 	;
 
 inclusive_or_expression
-	::= exclusive_or_expression
-	| inclusive_or_expression SOROP exclusive_or_expression
+	::= exclusive_or_expression:e												{: Logger.print("212 " + e); RESULT = e; :}
+	| inclusive_or_expression SOROP exclusive_or_expression						{: Logger.print("213"); :}
 	;
 
 logical_and_expression
-	::= inclusive_or_expression
-	| logical_and_expression AND_OP inclusive_or_expression
+	::= inclusive_or_expression:i												{: Logger.print("217 " + i); RESULT = i; :}
+	| logical_and_expression AND_OP inclusive_or_expression						{: Logger.print("218"); :}
 	;
 
 logical_or_expression
-	::= logical_and_expression
-	| logical_or_expression OR_OP logical_and_expression
+	::= logical_and_expression:l												{: Logger.print("222 " + l); RESULT = l; :}
+	| logical_or_expression OR_OP logical_and_expression						{: Logger.print("223"); :}
 	;
 
 conditional_expression
-	::= logical_or_expression
-	| logical_or_expression QUESTION expression COLON conditional_expression
+	::= logical_or_expression:l 												{: Logger.print("227 " + l); RESULT = l; :}  
+	| logical_or_expression QUESTION expression COLON conditional_expression	{: Logger.print("228"); :}
 	;
 
 assignment_expression
-	::= conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	::= conditional_expression:e												{: Logger.print("232 " + e); RESULT = e; :}
+	| unary_expression:u assignment_operator:o assignment_expression:e			{: Logger.print("233 unary_expression: " + u + " assignment_operator: " + o + " assignment_expression " + e); RESULT = e; :}
 	;
 
 assignment_operator
@@ -248,8 +248,8 @@ assignment_operator
 	;
 
 expression
-	::= assignment_expression
-	| expression COMMA assignment_expression
+	::= assignment_expression:a							{: Logger.print("251 assignment_expression " + a); RESULT = a; :}
+	| expression:e COMMA assignment_expression:a		{: Logger.print("252 expression: " + e + " assignment_expression: " + a); :} 
 	;
 
 constant_expression

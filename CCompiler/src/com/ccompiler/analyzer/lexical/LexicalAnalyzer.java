@@ -1200,7 +1200,7 @@ public class LexicalAnalyzer implements java_cup.runtime.Scanner {
           }
         case 137: break;
         case 39: 
-          { return symbol(sym.STRING_LITERAL);
+          { return symbol(sym.STRING_LITERAL, new String(yytext()));
           }
         case 138: break;
         case 40: 

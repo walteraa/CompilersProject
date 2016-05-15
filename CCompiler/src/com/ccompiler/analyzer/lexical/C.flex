@@ -147,7 +147,7 @@ BlockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 	{HP}{H}*"."{H}+{P}{FS}?		{ return symbol(sym.F_CONSTANT , new String(yytext())); }
 	{HP}{H}+"."{P}{FS}?			{ return symbol(sym.F_CONSTANT , new String(yytext())); }
 	
-	({SP}?\"([^\"\\\n]|{ES})*\"{WS}*)+	{ return symbol(sym.STRING_LITERAL); }
+	({SP}?\"([^\"\\\n]|{ES})*\"{WS}*)+	{ return symbol(sym.STRING_LITERAL, new String(yytext())); }
 	
 	"..."                   { return symbol(sym.ELLIPSIS); }
 	">>="                   { return symbol(sym.RIGHT_ASSIGN, new String(yytext())); }

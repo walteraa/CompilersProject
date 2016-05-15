@@ -105,8 +105,8 @@ enumeration_constant		/* before it has been defined as such */
 	;
 
 string
-	::= STRING_LITERAL
-	| FUNC_NAME
+	::= STRING_LITERAL:s					{: Logger.print("108 STRING_LITERAL: " + s); RESULT = new Expression(new Type("char"), s.toString()); :} 
+	| FUNC_NAME:f							{: Logger.print("109 FUNC_NAME: " + f); :}
 	;
 
 generic_selection
@@ -511,7 +511,7 @@ designator
 	;
 
 static_assert_declaration
-	::= STATIC_ASSERT LPAR constant_expression COMMA STRING_LITERAL RPAR SEMICOLON
+	::= STATIC_ASSERT LPAR constant_expression COMMA STRING_LITERAL RPAR SEMICOLON  {: Logger.print("514"); :}
 	;
 
 statement

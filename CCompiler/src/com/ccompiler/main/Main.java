@@ -3,8 +3,7 @@ package com.ccompiler.main;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
-import com.ccompiler.analyzer.lexical.LexicalAnalyzer;
-import com.ccompiler.analyzer.syntactical.Parser;
+import com.ccompiler.analysis.*;
 
 import java_cup.runtime.Symbol;
 
@@ -34,9 +33,9 @@ public class Main {
 	private static void startCompilationFor(String filePath) {
 		try {
 			System.out.println("Start compiling \"" + filePath + "\"...");
-			LexicalAnalyzer scanner = new LexicalAnalyzer(new BufferedReader(new FileReader(filePath)));
+			Lexical scanner = new Lexical(new BufferedReader(new FileReader(filePath)));
 
-			Parser parser = new Parser(scanner);
+			Syntatic parser = new Syntatic(scanner);
 			Symbol s = parser.parse();
 			
 			if (s.toString().equals("#0"))

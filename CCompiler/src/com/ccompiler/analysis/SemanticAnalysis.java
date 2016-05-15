@@ -1,4 +1,4 @@
-package com.ccompiler.util;
+package com.ccompiler.analysis;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import com.ccompiler.analyzer.syntactical.Parser;
 import com.ccompiler.core.Expression;
 import com.ccompiler.core.Function;
 import com.ccompiler.core.Identifier;
@@ -16,11 +15,12 @@ import com.ccompiler.core.Program;
 import com.ccompiler.core.ScopedEntity;
 import com.ccompiler.core.Type;
 import com.ccompiler.core.Variable;
+import com.ccompiler.util.SemanticException;
 
 
 public class SemanticAnalysis {
 
-	public static Parser parser;
+	public static Syntatic parser;
 	
 	private static final Type[] BASIC_TYPES = new Type[] {
 		new Type("int"),

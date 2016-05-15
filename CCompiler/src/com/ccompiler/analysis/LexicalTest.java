@@ -1,6 +1,6 @@
-package com.ccompiler.analyzer.lexical;
+package com.ccompiler.analysis;
 
-public class MainLexical {
+public class LexicalTest {
 	
 	private static final int MIN_INPUT_FILES = 1;
 
@@ -10,7 +10,7 @@ public class MainLexical {
 			displayHelpMessage();
 
 		} else {
-			LexicalAnalyzer.main(args);
+			Lexical.main(args);
 		}
 	}
 	

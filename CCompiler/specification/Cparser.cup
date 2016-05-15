@@ -1,4 +1,4 @@
-package com.ccompiler.analyzer.syntactical;
+package com.ccompiler.analysis;
 
 import java_cup.runtime.*;
 import com.ccompiler.util.*;

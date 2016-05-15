@@ -18,7 +18,7 @@ import com.ccompiler.core.Variable;
 import com.ccompiler.util.SemanticException;
 
 
-public class SemanticAnalysis {
+public class Semantic {
 
 	public static Syntatic parser;
 	
@@ -35,11 +35,11 @@ public class SemanticAnalysis {
 
 	public static ArrayList<String> variaveis = new ArrayList<String>();
 	public static ArrayList<String> valores = new ArrayList<String>();
-	private static SemanticAnalysis sAnalysis;
+	private static Semantic sAnalysis;
 	
-	public static SemanticAnalysis getInstance() {
+	public static Semantic getInstance() {
 		if (sAnalysis == null)
-			sAnalysis = new SemanticAnalysis();
+			sAnalysis = new Semantic();
 		return sAnalysis;
 	}
 	
@@ -49,7 +49,7 @@ public class SemanticAnalysis {
 	
 	private Stack<ScopedEntity> scopeStack;
 
-	private SemanticAnalysis(){
+	private Semantic(){
 		scopeStack = new Stack<ScopedEntity>();
 		cProgram = new Program();
 	}

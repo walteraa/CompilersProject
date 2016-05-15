@@ -2355,7 +2355,7 @@ public class Syntatic extends java_cup.runtime.lr_parser {
   /** User initialization code. */
   public void user_init() throws java.lang.Exception
     {
- SemanticAnalysis.parser = this;              
+ Semantic.parser = this;              
     }
 
 
@@ -2447,7 +2447,7 @@ class CUP$Syntatic$actions {
 		int csleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int csright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object cs = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		 Logger.print("587 compound_statement: " + d + " " + cs);  SemanticAnalysis.getInstance().exitCurrentScope(); 
+		 Logger.print("587 compound_statement: " + d + " " + cs);  Semantic.getInstance().exitCurrentScope(); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("function_definition",75, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-3)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -2462,7 +2462,7 @@ class CUP$Syntatic$actions {
 		int deleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int deright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object de = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
- Logger.print("587 declaration_specifiers: " + d + " declarator: " + de); ((Function) de).setReturnType((Type) d); SemanticAnalysis.getInstance().addFunctionAndNewScope((Function) de); 
+ Logger.print("587 declaration_specifiers: " + d + " declarator: " + de); ((Function) de).setReturnType((Type) d); Semantic.getInstance().addFunctionAndNewScope((Function) de); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("NT$0",77, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -2519,7 +2519,7 @@ class CUP$Syntatic$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).value;
-		 Logger.print("572 RETURN EXPRESSION: " + e); SemanticAnalysis.getInstance().checkReturnedType(e); RESULT = e; 
+		 Logger.print("572 RETURN EXPRESSION: " + e); Semantic.getInstance().checkReturnedType(e); RESULT = e; 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("jump_statement",72, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4034,7 +4034,7 @@ class CUP$Syntatic$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		  Logger.print("284 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; SemanticAnalysis.getInstance().toAssembly(SemanticAnalysis.labels+8+": ST " + d + ", " + (ex.getValue() == null ? "R1" : ex.getValue())); SemanticAnalysis.labels= SemanticAnalysis.labels+8; v.setValue(ex); RESULT = v; 
+		  Logger.print("284 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; Semantic.getInstance().toAssembly(Semantic.labels+8+": ST " + d + ", " + (ex.getValue() == null ? "R1" : ex.getValue())); Semantic.labels= Semantic.labels+8; v.setValue(ex); RESULT = v; 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("init_declarator",30, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4178,7 +4178,7 @@ class CUP$Syntatic$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).value;
-		 Logger.print("261 " + d + " " + i); ((Variable) i).setType((Type) d); SemanticAnalysis.getInstance().addVariable((Variable) i); RESULT = i; 
+		 Logger.print("261 " + d + " " + i); ((Variable) i).setType((Type) d); Semantic.getInstance().addVariable((Variable) i); RESULT = i; 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("declaration",27, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4496,7 +4496,7 @@ class CUP$Syntatic$actions {
 		int rleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int rright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object r = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		 Logger.print("198 equality_expression: " + e + " " + r); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.NE_OP, (Expression) e, (Expression) r); 
+		 Logger.print("198 equality_expression: " + e + " " + r); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.NE_OP, (Expression) e, (Expression) r); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("equality_expression",16, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4511,7 +4511,7 @@ class CUP$Syntatic$actions {
 		int rleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int rright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object r = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		 Logger.print("197 equality_expression: " + e + " " + r); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.EQ_OP, (Expression) e, (Expression) r); 
+		 Logger.print("197 equality_expression: " + e + " " + r); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.EQ_OP, (Expression) e, (Expression) r); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("equality_expression",16, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4538,7 +4538,7 @@ class CUP$Syntatic$actions {
 		int sleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int sright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object s = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		 Logger.print("192 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.GE_OP, (Expression) r, (Expression) s); 
+		 Logger.print("192 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.GE_OP, (Expression) r, (Expression) s); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("relational_expression",15, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4553,7 +4553,7 @@ class CUP$Syntatic$actions {
 		int sleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int sright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object s = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		 Logger.print("191 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LE_OP, (Expression) r, (Expression) s); 
+		 Logger.print("191 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.LE_OP, (Expression) r, (Expression) s); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("relational_expression",15, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4568,7 +4568,7 @@ class CUP$Syntatic$actions {
 		int sleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int sright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object s = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		 Logger.print("190 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.MORE_THAN, (Expression) r, (Expression) s); 
+		 Logger.print("190 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.MORE_THAN, (Expression) r, (Expression) s); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("relational_expression",15, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4583,7 +4583,7 @@ class CUP$Syntatic$actions {
 		int sleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int sright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object s = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		 Logger.print("189 relational_expression: " + r + " shift_expression: " + s); RESULT = SemanticAnalysis.getInstance().getExpressionForOperation(Operation.LESS_THAN, (Expression) r, (Expression) s); 
+		 Logger.print("189 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.LESS_THAN, (Expression) r, (Expression) s); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("relational_expression",15, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4955,7 +4955,7 @@ class CUP$Syntatic$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-1)).value;
-		 Logger.print("130 " + p + " " + i); SemanticAnalysis.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); 
+		 Logger.print("130 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("postfix_expression",7, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-3)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -4967,7 +4967,7 @@ class CUP$Syntatic$actions {
 		int pleft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)).left;
 		int pright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)).right;
 		Object p = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)).value;
-		 Logger.print("129 " + p); SemanticAnalysis.getInstance().isFunction(p); SemanticAnalysis.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; 
+		 Logger.print("129 " + p); Semantic.getInstance().isFunction(p); Semantic.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("postfix_expression",7, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.elementAt(CUP$Syntatic$top-2)), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;
@@ -5162,7 +5162,7 @@ class CUP$Syntatic$actions {
 		int ileft = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).left;
 		int iright = ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()).right;
 		Object i = (Object)((java_cup.runtime.Symbol) CUP$Syntatic$stack.peek()).value;
-		 RESULT = SemanticAnalysis.getInstance().getIdentifier((String) i);;  Logger.print("90 IDENTIFIER " + i); 
+		 RESULT = Semantic.getInstance().getIdentifier((String) i);;  Logger.print("90 IDENTIFIER " + i); 
               CUP$Syntatic$result = parser.getSymbolFactory().newSymbol("primary_expression",0, ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), ((java_cup.runtime.Symbol)CUP$Syntatic$stack.peek()), RESULT);
             }
           return CUP$Syntatic$result;

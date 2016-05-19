@@ -77,7 +77,8 @@ public class Semantic {
 		createNewScope(f);
 		
 		// Add to assembly
-		toAssembly((labels+=8)+": "+f.getName() + ":");
+		//TODO CHECK THIS
+		//addCode((labels+=8)+": "+f.getName() + ":");
 	}
 	
 	public void createIf(Expression e) {
@@ -165,11 +166,11 @@ public class Semantic {
 			throw new SemanticException("Calling function not declared: " + functionName + "()");
 		}
 		
-		toAssembly(labels+": ADD SP, SP, #size");
-		toAssembly(labels+8+": ST *ST, #" + labels+32);
-		toAssembly(labels+16+": BR " + functionName);
-		toAssembly(labels+32 + ":");
-		toAssembly(labels+40+": SUB SP, SP, #size");
+		addCode(labels+": ADD SP, SP, #size");
+		addCode(labels+8+": ST *ST, #" + labels+32);
+		addCode(labels+16+": BR " + functionName);
+		addCode(labels+32 + ":");
+		addCode(labels+40+": SUB SP, SP, #size");
 		labels= labels+56;
 	}
 	
@@ -178,11 +179,11 @@ public class Semantic {
 			throw new SemanticException("Calling function not declared: " + functionName + " " + Arrays.toString(types));
 		}
 		
-		toAssembly(labels+": ADD SP, SP, #size");
-		toAssembly(labels+8+": ST *ST, #" + labels+32);
-		toAssembly(labels+16+": BR " + functionName);
-		toAssembly(labels +32+ ":");
-		toAssembly(labels+40+": SUB SP, SP, #size");
+		addCode(labels+": ADD SP, SP, #size");
+		addCode(labels+8+": ST *ST, #" + labels+32);
+		addCode(labels+16+": BR " + functionName);
+		addCode(labels +32+ ":");
+		addCode(labels+40+": SUB SP, SP, #size");
 		labels= labels+56;
 	}
 	
@@ -273,126 +274,140 @@ public class Semantic {
 		return new Expression(e1.getType());
 	}
 	
-	public static int labels = 100;
-	public static int labelAux;
-	public static String assemblyCode = "100: LD SP, 1000\n";
+	public int labels = 100;
+	public int labelAux;
+	public String assemblyCode = initAssemblyCode();
+	
+	private String initAssemblyCode(){
+		return "100: LD SP, 1000\n";
+	}
 
-	public static void AssemblyGenerator(Operation op, Expression e1, Expression e2) {
+	public void AssemblyGenerator(Operation op, Expression e1, Expression e2) {
 		if (op.equals(Operation.PLUS)) {// +
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+ ": ADD R1, R1, R2");
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+ ": ADD R1, R1, R2");
 			labels = labels + 16;
 		}
 		else if (op.equals(Operation.MINUS)) {// -
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+": SUB R1, R1, R2");
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+": SUB R1, R1, R2");
 			labels = labels + 16;
 		}
 		else if (op.equals(Operation.MULT)) {// *
-			toAssembly(labels+  ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+": MUL R1, R1, R2");
+			addCode(labels+  ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+": MUL R1, R1, R2");
 			labels = labels + 16;
 		}
 		else if (op.equals(Operation.DIV)) {// /
-			toAssembly(labels+   ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+": DIV R1, R1, R2");
+			addCode(labels+   ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+": DIV R1, R1, R2");
 			labels = labels + 16;
 		}
 		else if (op.equals(Operation.EQ_OP)) {// ==
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+ ": SUB R1, R1, R2");
-						toAssembly(labels+32+ ": BEQZ R1, " + (labels + 56)); //if
-			toAssembly(labels+40+": LD R1, #0"); //else
-			toAssembly(labels+48+ ": BR "+ (labels+64));    //else
-						toAssembly((labels+56)+": LD R1, #1"); //if
-			toAssembly(labels+64+":");		  //else
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+ ": SUB R1, R1, R2");
+						addCode(labels+32+ ": BEQZ R1, " + (labels + 56)); //if
+			addCode(labels+40+": LD R1, #0"); //else
+			addCode(labels+48+ ": BR "+ (labels+64));    //else
+						addCode((labels+56)+": LD R1, #1"); //if
+			addCode(labels+64+":");		  //else
 			labels = labels + 64;
 		}
 		else if (op.equals(Operation.NE_OP)) {// !=
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+ ": SUB R1, R1, R2");
-						toAssembly(labels+32+ ": BEQZ R1, " + (labels + 56)); //if
-			toAssembly(labels+40+": LD R1, #1"); //else
-			toAssembly(labels+48+ ": BR "+ (labels+64));    //else
-						toAssembly((labels+56)+": LD R1, #0"); //if
-			toAssembly(labels+64+":");		  //else
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+ ": SUB R1, R1, R2");
+						addCode(labels+32+ ": BEQZ R1, " + (labels + 56)); //if
+			addCode(labels+40+": LD R1, #1"); //else
+			addCode(labels+48+ ": BR "+ (labels+64));    //else
+						addCode((labels+56)+": LD R1, #0"); //if
+			addCode(labels+64+":");		  //else
 			labels = labels + 64;
 		}
 		else if (op.equals(Operation.AND_OP)) {// &&
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-						toAssembly(labels+16+ ": BEQZ R1, " + (labels+56)); //if
-						toAssembly(labels+32+ ": BEQZ R2, " + (labels+56)); //if
-			toAssembly((labels)+40+": LD R1, #1"); //else
-			toAssembly(labels+48+ ": BR "+ (labels+64));    //else
-						toAssembly((labels+56)+": LD R1, #0"); //if
-			toAssembly(labels+64+":");		  //else
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+						addCode(labels+16+ ": BEQZ R1, " + (labels+56)); //if
+						addCode(labels+32+ ": BEQZ R2, " + (labels+56)); //if
+			addCode((labels)+40+": LD R1, #1"); //else
+			addCode(labels+48+ ": BR "+ (labels+64));    //else
+						addCode((labels+56)+": LD R1, #0"); //if
+			addCode(labels+64+":");		  //else
 			labels = labels + 64;
 		}
 		else if (op.equals(Operation.OR_OP)) { // ||
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-						toAssembly(labels+16+ ": BNEZ R1, " + (labels+56)); //if
-						toAssembly(labels+32+ ": BNEZ R2, " + (labels+56)); //if
-			toAssembly((labels+40)+": LD R1, #0"); //else
-			toAssembly(labels+48+ ": BR "+ (labels+64));    //else
-						toAssembly((labels+56)+": LD R1, #1"); //if
-			toAssembly(labels+64+":");		  //else
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+						addCode(labels+16+ ": BNEZ R1, " + (labels+56)); //if
+						addCode(labels+32+ ": BNEZ R2, " + (labels+56)); //if
+			addCode((labels+40)+": LD R1, #0"); //else
+			addCode(labels+48+ ": BR "+ (labels+64));    //else
+						addCode((labels+56)+": LD R1, #1"); //if
+			addCode(labels+64+":");		  //else
 			labels = labels + 64;
 		} else if (op.equals(Operation.LESS_THAN)) {// x - 3 < 0
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+ ": SUB R1, R1, R2");
-						toAssembly(labels+32+ ": BLTZ R1, " + (labels + 56)); //if
-			toAssembly(labels+40+": LD R1, #0"); //else
-			toAssembly(labels+48+ ": BR "+ (labels+64));    //else
-						toAssembly((labels+56)+": LD R1, #1"); //if
-			toAssembly(labels+64+":");		  //else
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+ ": SUB R1, R1, R2");
+						addCode(labels+32+ ": BLTZ R1, " + (labels + 56)); //if
+			addCode(labels+40+": LD R1, #0"); //else
+			addCode(labels+48+ ": BR "+ (labels+64));    //else
+						addCode((labels+56)+": LD R1, #1"); //if
+			addCode(labels+64+":");		  //else
 			labels = labels + 64;
 		} else if (op.equals(Operation.MORE_THAN)) {// >
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+ ": SUB R1, R1, R2");
-						toAssembly(labels+32+ ": BGTZ R1, " + (labels + 52)); //if
-			toAssembly(labels+40+": LD R1, #0"); //else
-			toAssembly(labels+48+ ": BR "+ (labels+64));    //else
-						toAssembly((labels+52)+": LD R1, #1"); //if
-			toAssembly(labels+64+":");		  //else
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+ ": SUB R1, R1, R2");
+						addCode(labels+32+ ": BGTZ R1, " + (labels + 52)); //if
+			addCode(labels+40+": LD R1, #0"); //else
+			addCode(labels+48+ ": BR "+ (labels+64));    //else
+						addCode((labels+52)+": LD R1, #1"); //if
+			addCode(labels+64+":");		  //else
 			labels = labels + 64;
 		} else if (op.equals(Operation.LE_OP)) {//  <=
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+ ": SUB R1, R1, R2");
-						toAssembly(labels+32+ ": BLEZ R1, " + (labels + 56)); //if
-			toAssembly(labels+40+": LD R1, #0"); //else
-			toAssembly(labels+48+ ": BR "+ (labels+64));    //else
-						toAssembly((labels+56)+": LD R1, #1"); //if
-			toAssembly(labels+64+":");		  //else
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+ ": SUB R1, R1, R2");
+						addCode(labels+32+ ": BLEZ R1, " + (labels + 56)); //if
+			addCode(labels+40+": LD R1, #0"); //else
+			addCode(labels+48+ ": BR "+ (labels+64));    //else
+						addCode((labels+56)+": LD R1, #1"); //if
+			addCode(labels+64+":");		  //else
 			labels = labels + 64;
 		} else if (op.equals(Operation.GE_OP)) {// >=
-			toAssembly(labels+ ": LD R1, " + e1.getAssemblyValue());
-			toAssembly(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			toAssembly(labels+16+ ": SUB R1, R1, R2");
-						toAssembly(labels+32+ ": BGEZ R1, " + (labels + 56)); //if
-			toAssembly(labels+40+": LD R1, #0"); //else
-			toAssembly(labels+48+ ": BR "+ (labels+64));    //else
-						toAssembly((labels+56)+": LD R1, #1"); //if
-			toAssembly(labels+64+":");		  //else
+			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
+			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
+			addCode(labels+16+ ": SUB R1, R1, R2");
+						addCode(labels+32+ ": BGEZ R1, " + (labels + 56)); //if
+			addCode(labels+40+": LD R1, #0"); //else
+			addCode(labels+48+ ": BR "+ (labels+64));    //else
+						addCode((labels+56)+": LD R1, #1"); //if
+			addCode(labels+64+":");		  //else
 			labels = labels + 64;
 		}
-		
-		
-//		labels += 100; 
-//		toAssembly("...");
 	}
 	
-	public static void toAssembly(String assemblyString) {
+	//TODO RUAN REIS
+	public void generateAssignmentDeclarationCode(Variable variable ,Expression expreesion){
+		String register = "R0";
+		
+		labels += 8;
+		addCode(labels + ": LD " + register + ", " + expreesion.getValue());
+		labels += 8;
+		addCode(labels + ": ST " + variable.getName() + ", "+ register);
+	}
+	
+	public void addCode(String assemblyString) {
 		assemblyCode += assemblyString + "\n";
+	}
+	
+	public String getAssemblyCode(){
+		return assemblyCode;
 	}
 }

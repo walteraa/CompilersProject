@@ -281,7 +281,7 @@ init_declarator_list
 	;
 
 init_declarator
-	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 TODO: CHECK VARIABLE NAME " + d + " " + i); Variable v = new Variable(d.toString(), new Type("UNKNOWN")); Expression ex = (Expression) i; RESULT = v; :}
+	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); Expression exp = (Expression) i; RESULT = var; Semantic.getInstance().generateAssignmentDeclarationCode(var, exp); :}
 	| declarator:d										{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
 	;
 

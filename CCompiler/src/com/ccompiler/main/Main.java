@@ -38,11 +38,13 @@ public class Main {
 			Syntatic parser = new Syntatic(scanner);
 			Symbol s = parser.parse();
 			
-			if (s.toString().equals("#0"))
+			if (s.toString().equals("#0")){
 				System.out.println("> SUCCESSFULL COMPILATION: " + filePath);
-			else
+				System.out.println("\n> GENERATED CODE:\n");
+				System.out.println(Semantic.getInstance().getAssemblyCode());
+			} else {
 				System.out.println(s);
-			
+			}
 		} catch (Exception e) {
 			System.err.println("Failed to compile \"" + filePath + "\":");
 			System.err.println(e.getMessage());

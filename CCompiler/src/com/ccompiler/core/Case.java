@@ -2,17 +2,17 @@ package com.ccompiler.core;
 
 import com.ccompiler.util.SemanticException;
 
-public class IfElse extends ScopedEntity{
+public class Case extends ScopedEntity{
 	
 	private Expression expression;
 	
-	public IfElse() {
-		super("if");
+	public Case() {
+		super("case");
 		
 	}
 
-	public IfElse(Expression expression) {
-		super("if");
+	public Case(Expression expression) {
+		super("case");
 		checkExpression(expression);
 		this.expression = expression;
 	}
@@ -27,8 +27,8 @@ public class IfElse extends ScopedEntity{
 	}
 	
 	private void checkExpression(Expression e) {
-		if (!e.getType().equals(new Type("int")) && !e.getType().equals(new Type("bool")))
-			throw new SemanticException("If expression not 'int' or 'bool', instead is " + e.getType());
+		if (!e.getType().equals(new Type("int")) && !e.getType().equals(new Type("char")))
+			throw new SemanticException("If expression not 'int' or 'char', instead is " + e.getType());
 	}
 
 }

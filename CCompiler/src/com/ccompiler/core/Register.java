@@ -5,7 +5,8 @@ package com.ccompiler.core;
  *	A C Operation... Nodes are the parameters of the operation...
  */
 public enum Register {
-	 R1("R1"), R2("R2"), R3("R3"), R4("R4"), R5("R5"), R6("R6"), R7("R7"), R8("R8"), R9("R9");
+	 R1("R1"), R2("R2"), R3("R3"), R4("R4"), R5("R5"), R6("R6"), R7("R7"), R8("R8"), R9("R9"), R10("R10"), 
+	 R11("R11") , R12("R12") , R13("R13") , R14("R14"), R15("R15") , R16("R16"), R17("R17"), R18("R18"), R19("R19") ;
 	
 	private String value;
 

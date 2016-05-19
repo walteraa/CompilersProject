@@ -38,7 +38,7 @@ public class Expression extends NamedEntity { // Not Really a named entity, but.
 	}
 	
 	public String getAssemblyValue() {
-		return value == null ? "R1" : value;
+		return value == null ? getName() : value;
 	}
 	
 	public void setValue(Expression exp) {

@@ -12,6 +12,7 @@ import com.ccompiler.core.Identifier;
 import com.ccompiler.core.IfElse;
 import com.ccompiler.core.Operation;
 import com.ccompiler.core.Program;
+import com.ccompiler.core.Register;
 import com.ccompiler.core.ScopedEntity;
 import com.ccompiler.core.Type;
 import com.ccompiler.core.Variable;
@@ -263,6 +264,7 @@ public class Semantic {
 		case MULT:
 		case PERC:
 		case PLUS:
+			generateADDCode();
 		case DIV:
 			if (checkIsNumber(e1.getType()) && checkIsNumber(e2.getType()))
 				return new Expression(e1.getType());
@@ -274,133 +276,39 @@ public class Semantic {
 		return new Expression(e1.getType());
 	}
 	
-	public int labels = 100;
-	public int labelAux;
-	public String assemblyCode = initAssemblyCode();
+	//TODO RUAN REIS
+	
+	private int labels = 100;
+	private String assemblyCode = initAssemblyCode();
+	
+	private int register = -1; 
+	private Register[] registers = Register.values();
 	
 	private String initAssemblyCode(){
 		return "100: LD SP, 1000\n";
 	}
 
-	public void AssemblyGenerator(Operation op, Expression e1, Expression e2) {
-		if (op.equals(Operation.PLUS)) {// +
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+ ": ADD R1, R1, R2");
-			labels = labels + 16;
-		}
-		else if (op.equals(Operation.MINUS)) {// -
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+": SUB R1, R1, R2");
-			labels = labels + 16;
-		}
-		else if (op.equals(Operation.MULT)) {// *
-			addCode(labels+  ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+": MUL R1, R1, R2");
-			labels = labels + 16;
-		}
-		else if (op.equals(Operation.DIV)) {// /
-			addCode(labels+   ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+": DIV R1, R1, R2");
-			labels = labels + 16;
-		}
-		else if (op.equals(Operation.EQ_OP)) {// ==
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+ ": SUB R1, R1, R2");
-						addCode(labels+32+ ": BEQZ R1, " + (labels + 56)); //if
-			addCode(labels+40+": LD R1, #0"); //else
-			addCode(labels+48+ ": BR "+ (labels+64));    //else
-						addCode((labels+56)+": LD R1, #1"); //if
-			addCode(labels+64+":");		  //else
-			labels = labels + 64;
-		}
-		else if (op.equals(Operation.NE_OP)) {// !=
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+ ": SUB R1, R1, R2");
-						addCode(labels+32+ ": BEQZ R1, " + (labels + 56)); //if
-			addCode(labels+40+": LD R1, #1"); //else
-			addCode(labels+48+ ": BR "+ (labels+64));    //else
-						addCode((labels+56)+": LD R1, #0"); //if
-			addCode(labels+64+":");		  //else
-			labels = labels + 64;
-		}
-		else if (op.equals(Operation.AND_OP)) {// &&
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-						addCode(labels+16+ ": BEQZ R1, " + (labels+56)); //if
-						addCode(labels+32+ ": BEQZ R2, " + (labels+56)); //if
-			addCode((labels)+40+": LD R1, #1"); //else
-			addCode(labels+48+ ": BR "+ (labels+64));    //else
-						addCode((labels+56)+": LD R1, #0"); //if
-			addCode(labels+64+":");		  //else
-			labels = labels + 64;
-		}
-		else if (op.equals(Operation.OR_OP)) { // ||
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-						addCode(labels+16+ ": BNEZ R1, " + (labels+56)); //if
-						addCode(labels+32+ ": BNEZ R2, " + (labels+56)); //if
-			addCode((labels+40)+": LD R1, #0"); //else
-			addCode(labels+48+ ": BR "+ (labels+64));    //else
-						addCode((labels+56)+": LD R1, #1"); //if
-			addCode(labels+64+":");		  //else
-			labels = labels + 64;
-		} else if (op.equals(Operation.LESS_THAN)) {// x - 3 < 0
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+ ": SUB R1, R1, R2");
-						addCode(labels+32+ ": BLTZ R1, " + (labels + 56)); //if
-			addCode(labels+40+": LD R1, #0"); //else
-			addCode(labels+48+ ": BR "+ (labels+64));    //else
-						addCode((labels+56)+": LD R1, #1"); //if
-			addCode(labels+64+":");		  //else
-			labels = labels + 64;
-		} else if (op.equals(Operation.MORE_THAN)) {// >
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+ ": SUB R1, R1, R2");
-						addCode(labels+32+ ": BGTZ R1, " + (labels + 52)); //if
-			addCode(labels+40+": LD R1, #0"); //else
-			addCode(labels+48+ ": BR "+ (labels+64));    //else
-						addCode((labels+52)+": LD R1, #1"); //if
-			addCode(labels+64+":");		  //else
-			labels = labels + 64;
-		} else if (op.equals(Operation.LE_OP)) {//  <=
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+ ": SUB R1, R1, R2");
-						addCode(labels+32+ ": BLEZ R1, " + (labels + 56)); //if
-			addCode(labels+40+": LD R1, #0"); //else
-			addCode(labels+48+ ": BR "+ (labels+64));    //else
-						addCode((labels+56)+": LD R1, #1"); //if
-			addCode(labels+64+":");		  //else
-			labels = labels + 64;
-		} else if (op.equals(Operation.GE_OP)) {// >=
-			addCode(labels+ ": LD R1, " + e1.getAssemblyValue());
-			addCode(labels+8+ ": LD R2, " + e2.getAssemblyValue());
-			addCode(labels+16+ ": SUB R1, R1, R2");
-						addCode(labels+32+ ": BGEZ R1, " + (labels + 56)); //if
-			addCode(labels+40+": LD R1, #0"); //else
-			addCode(labels+48+ ": BR "+ (labels+64));    //else
-						addCode((labels+56)+": LD R1, #1"); //if
-			addCode(labels+64+":");		  //else
-			labels = labels + 64;
-		}
+	public void generateADDCode(){
+		labels += 8;
+		
+		Register one = registers[register - 1];
+		Register two = registers[register];
+		
+		register++;
+		Register result = registers[register];
+		addCode(labels + ": ADD " + result + ", " + one + ", " + two);
 	}
 	
-	//TODO RUAN REIS
-	public void generateAssignmentDeclarationCode(Variable variable ,Expression expreesion){
-		String register = "R0";
-		
+	public void generateLDCode(Expression expression){
+		register++;
 		labels += 8;
-		addCode(labels + ": LD " + register + ", " + expreesion.getValue());
+		addCode(labels + ": LD " + registers[register] + ", " + expression.getAssemblyValue());
+	}
+	
+	public void generateSTCode(Variable variable){
 		labels += 8;
-		addCode(labels + ": ST " + variable.getName() + ", "+ register);
+		addCode(labels + ": ST " + variable.getName() + ", "+ registers[register]);
+		this.register = -1;
 	}
 	
 	public void addCode(String assemblyString) {

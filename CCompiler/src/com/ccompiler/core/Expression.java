@@ -2,12 +2,12 @@ package com.ccompiler.core;
 
 import com.ccompiler.util.SemanticException;
 
-public class Expression extends NamedEntity { // Not Really a named entity, but...
+public class Expression extends NamedEntity {
 	
 	private Type type;
 	private String value;
 	
-	public Expression(String name) { // For Variables..
+	public Expression(String name) {
 		super(name);
 		type = new Type("UNKNOWN");
 	}
@@ -47,6 +47,37 @@ public class Expression extends NamedEntity { // Not Really a named entity, but.
 		this.value = exp.getValue();
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Expression other = (Expression) obj;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
+	}
+
 	public String toString() {
 		if (getValue() == null) {
 			return "{ Expression: " + getType() + "}";

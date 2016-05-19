@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import com.ccompiler.core.Case;
 import com.ccompiler.core.Expression;
 import com.ccompiler.core.Function;
 import com.ccompiler.core.Identifier;
@@ -55,8 +56,6 @@ public class Semantic {
 		cProgram = new Program();
 	}
 	
-	// Operations ...
-	
 	private void createNewScope(ScopedEntity scope) {
 		scopeStack.push(scope);
 	}
@@ -78,8 +77,16 @@ public class Semantic {
 		createNewScope(f);
 	}
 	
-	public void createSwitchCase(Expression e) {
-		createNewScope(new Switch(e));
+	/** Switch Case Semantic */
+	private Switch switchCase = new Switch();
+	
+	public void checkSwitchCase(Expression e) {
+		this.switchCase.setExpression(e);
+		//TODO Ruan: resetar o switch depois de analisar e gerar código
+	}
+	
+	public void addCaseToSwitch(Expression e){
+		this.switchCase.addCase(new Case(e));
 	}
 	
 	public void addVariable(Variable v) {

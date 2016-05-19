@@ -87,16 +87,16 @@ non terminal external_declaration, function_definition, declaration_list;
 start with translation_unit;
 
 primary_expression
-	::= IDENTIFIER:i					{: Logger.print("90 IDENTIFIER " + i); RESULT = Semantic.getInstance().getIdentifier((String) i); Semantic.getInstance().generateLDCode(new Expression((String) i)); :}
+	::= IDENTIFIER:i					{: Logger.print("90 IDENTIFIER: " + i); RESULT = Semantic.getInstance().getIdentifier((String) i); Semantic.getInstance().generateLDCode(new Expression((String) i)); :}
 	| constant:c						{: RESULT = c;  Logger.print("91 constant " + c); Semantic.getInstance().generateLDCode((Expression)c); :}
-	| string:s							{: RESULT = s;  Logger.print("92 string " + s); :}
+	| string:s							{: RESULT = s;  Logger.print("92 string " + s); Semantic.getInstance().generateLDCode((Expression)s); :}
 	| LPAR expression:e RPAR			{: RESULT = e;  Logger.print("93 expression " + e); :}
 	| generic_selection:g 				{: RESULT = g;  Logger.print("94 generic_selection " + g); :}
 	;
 
 constant
-	::= I_CONSTANT:i				{: Logger.print("98 " + i); RESULT = new Expression(new Type("int"), i.toString()); :}
-	| F_CONSTANT:f					{: Logger.print("99 " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
+	::= I_CONSTANT:i				{: Logger.print("98 I_CONSTANT: " + i); RESULT = new Expression(new Type("int"), i.toString()); :}
+	| F_CONSTANT:f					{: Logger.print("99 F_CONSTANT: " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
 	| ENUMERATION_CONSTANT	/* after it has been defined as such */
 	;
 
@@ -105,7 +105,7 @@ enumeration_constant		/* before it has been defined as such */
 	;
 
 string
-	::= STRING_LITERAL:s					{: Logger.print("108 STRING_LITERAL: " + s); RESULT = new Expression(new Type("char"), s.toString()); :} 
+	::= STRING_LITERAL:s					{: Logger.print("108 STRING_LITERAL: " + s); RESULT = new Expression(new Type("char*"), s.toString()); :} 
 	| FUNC_NAME:f							{: Logger.print("109 FUNC_NAME: " + f); :}
 	;
 
@@ -393,8 +393,8 @@ alignment_specifier
 	;
 
 declarator
-	::= pointer direct_declarator:p 					{: Logger.print("396" + p ); RESULT = p; :}
-	| direct_declarator:d								{: Logger.print("397 direct_declarator " + d ); RESULT = d; :}
+	::= pointer direct_declarator:p 					{: Logger.print("396 direct_declarator: " + p ); RESULT = p; :}
+	| direct_declarator:d								{: Logger.print("397 direct_declarator: " + d ); RESULT = d; :}
 	;
 
 direct_declarator
@@ -525,7 +525,7 @@ statement
 
 labeled_statement
 	::= IDENTIFIER:i COLON statement:s						{: Logger.print("527 IDENTIFIER: " + i + " statement: " + s); RESULT = s; :}
-	| CASE constant_expression:ce COLON statement:s 		{: Logger.print("528 constant_expression: " + ce + " statement: " + s); RESULT = s; :}
+	| CASE constant_expression:ce COLON statement:s 		{: Logger.print("528 constant_expression: " + ce + " statement: " + s); RESULT = s; Semantic.getInstance().addCaseToSwitch((Expression) ce); :}
 	| DEFAULT:d COLON statement:s							{: Logger.print("529 DEFAULT: " + d + " statement: " + s); RESULT = s; :}
 	;
 
@@ -551,8 +551,8 @@ expression_statement
 
 selection_statement
 	::= IF LPAR expression RPAR statement ELSE statement
-	| IF LPAR expression RPAR statements
-	| SWITCH LPAR expression:e RPAR statement:s						{: Logger.print("555 expression: " + e + " statement: " + s); SemanticAnalysis.getInstance().createSwitchCase((Expression) e);:}
+	| IF LPAR expression RPAR statement
+	| SWITCH LPAR expression:e RPAR statement:s						{: Logger.print("555 expression: " + e + " statement: " + s); Semantic.getInstance().checkSwitchCase((Expression) e);:}
 	;
 
 iteration_statement

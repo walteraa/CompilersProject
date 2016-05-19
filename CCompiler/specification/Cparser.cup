@@ -87,8 +87,8 @@ non terminal external_declaration, function_definition, declaration_list;
 start with translation_unit;
 
 primary_expression
-	::= IDENTIFIER:i					{: RESULT = Semantic.getInstance().getIdentifier((String) i);;  Logger.print("90 IDENTIFIER " + i); :}
-	| constant:c						{: RESULT = c; Semantic.getInstance().generateLDCode((Expression) c);  Logger.print("91 constant " + c); :}
+	::= IDENTIFIER:i					{: RESULT = Semantic.getInstance().getIdentifier((String) i); Semantic.getInstance().generateLDCode(new Expression((String) i));  Logger.print("90 IDENTIFIER " + i); :}
+	| constant:c						{: RESULT = c; Semantic.getInstance().generateLDCode((Expression)c);  Logger.print("91 constant " + c); :}
 	| string:s							{: RESULT = s;  Logger.print("92 string " + s); :}
 	| LPAR expression:e RPAR			{: RESULT = e;  Logger.print("93 expression " + e); :}
 	| generic_selection:g 				{: RESULT = g;  Logger.print("94 generic_selection " + g); :}

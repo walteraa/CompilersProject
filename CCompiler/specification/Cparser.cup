@@ -65,6 +65,8 @@ terminal	ALIGNAS, ALIGNOF, ATOMIC, GENERIC, NORETURN, STATIC_ASSERT, THREAD_LOCA
 terminal COMMA, DOT, STAR, LSQRBRK, RSQRBRK, LT, GT, QUESTION, SEMICOLON, COLON, LPAR, RPAR, LBRK, RBRK;
 terminal SINGLEAND, SOROP, XOROP, ASSIGNMENT, PLUSOP, LOGNEGATION, MINUSOP, BINNEG, MODOP, DIVOP;
 
+
+
 /**
  * Non Terminals
  */
@@ -83,6 +85,11 @@ non terminal identifier_list, type_name, abstract_declarator, direct_abstract_de
 non terminal designation, designator_list, designator, static_assert_declaration, statement, labeled_statement, compound_statement;
 non terminal block_item_list, block_item, expression_statement, selection_statement, iteration_statement, jump_statement, translation_unit;
 non terminal external_declaration, function_definition, declaration_list;
+
+
+precedence left PLUSOP, MINUSOP; 
+precedence left DIVOP; 
+
 
 start with translation_unit;
 
@@ -125,10 +132,10 @@ generic_association
 	;
 
 postfix_expression
-	::= primary_expression:p												{: Logger.print("127 " + p); RESULT = p; :}
-	| postfix_expression LSQRBRK expression:e RSQRBRK						{: Logger.print("128 " + e); :}
-	| postfix_expression:p LPAR RPAR										{: Logger.print("129 " + p); Semantic.getInstance().isFunction(p); Semantic.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
-	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("130 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
+	::= primary_expression:p												{: Logger.print("128 " + p); RESULT = p; :}
+	| postfix_expression LSQRBRK expression:e RSQRBRK						{: Logger.print("129 " + e); :}
+	| postfix_expression:p LPAR RPAR										{: Logger.print("130 " + p); Semantic.getInstance().isFunction(p); Semantic.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
+	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("131 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
 	| postfix_expression DOT IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
 	| postfix_expression:p INC_OP											{: Logger.print("133 postfix_expression: " + p); RESULT = p; :}
@@ -139,7 +146,7 @@ postfix_expression
 
 argument_expression_list
 	::= assignment_expression:a												{: RESULT = Util.newList( (Expression) a );  Logger.print("140 assignment_expression " + a); :} 
-	| argument_expression_list COMMA assignment_expression
+	| argument_expression_list:iList COMMA assignment_expression:e			 {: ((ArrayList<Expression>) iList).add((Expression)e); RESULT = iList; :}
 	;
 
 unary_expression
@@ -176,7 +183,7 @@ multiplicative_expression
 additive_expression
 	::= multiplicative_expression:m												{: Logger.print("176 multiplicative_expression: " + m); RESULT = m; :}
 	| additive_expression:a PLUSOP multiplicative_expression:m					{: Logger.print("177 additive_expression: " + a + " multiplicative_expression: " + m); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.PLUS, (Expression) a, (Expression) m); :}
-	| additive_expression MINUSOP multiplicative_expression						{: Logger.print("178 multiplicative_expression: "); :}
+	| additive_expression:a MINUSOP multiplicative_expression:m						{: Logger.print("178 minus_expression: ");  RESULT = Semantic.getInstance().getExpressionForOperation(Operation.MINUS, (Expression) a, (Expression) m); :}
 	;
 
 shift_expression
@@ -282,7 +289,7 @@ init_declarator_list
 	;
 
 init_declarator
-	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var; Semantic.getInstance().generateSTCode(var); :}
+	::= declarator:d  ASSIGNMENT initializer:i			{:  Logger.print("284 " + d + " -  " ); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var;  Semantic.getInstance().generateSTCode(var); :}
 	| declarator:d										{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
 	;
 

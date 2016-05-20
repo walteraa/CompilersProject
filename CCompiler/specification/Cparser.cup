@@ -265,22 +265,22 @@ constant_expression
 	;
 
 declaration
-	::= declaration_specifiers:d SEMICOLON
-	| declaration_specifiers:d init_declarator_list:i SEMICOLON 		{: Logger.print("261 " + d + " " + i); ((Variable) i).setType((Type) d); Semantic.getInstance().addVariable((Variable) i); RESULT = i; :}
-	| static_assert_declaration
+	::= declaration_specifiers:d SEMICOLON								
+	| declaration_specifiers:d init_declarator_list:i SEMICOLON 		{: Logger.print("269 " + d + " " + i); ((Variable) i).setType((Type) d); Semantic.getInstance().addVariable((Variable) i); RESULT = i; :}
+	| static_assert_declaration											
 	;
 
 declaration_specifiers
-	::= storage_class_specifier declaration_specifiers
-	| storage_class_specifier
-	| type_specifier declaration_specifiers
-	| type_specifier:s 													{: Logger.print("269 type_specifier: " + s); RESULT = s; :} 
-	| type_qualifier declaration_specifiers
-	| type_qualifier
-	| function_specifier declaration_specifiers
-	| function_specifier
-	| alignment_specifier declaration_specifiers
-	| alignment_specifier
+	::= storage_class_specifier declaration_specifiers				
+	| storage_class_specifier											
+	| type_specifier declaration_specifiers								
+	| type_specifier:s 													{: Logger.print("277 type_specifier: " + s); RESULT = s; :} 
+	| type_qualifier declaration_specifiers							 
+	| type_qualifier													
+	| function_specifier declaration_specifiers							
+	| function_specifier											
+	| alignment_specifier declaration_specifiers					
+	| alignment_specifier												
 	;
 
 init_declarator_list
@@ -351,14 +351,14 @@ specifier_qualifier_list
 	;
 
 struct_declarator_list
-	::= struct_declarator
-	| struct_declarator_list COMMA struct_declarator
+	::= struct_declarator:s									{: Logger.print("354 struct_declarator: " + s ); RESULT = s; :}
+	| struct_declarator_list:dl COMMA struct_declarator		{: Logger.print("355 struct_declarator_list: " + dl ); RESULT = dl; :}
 	;
 
 struct_declarator
-	::= COLON constant_expression
-	| declarator COLON constant_expression
-	| declarator
+	::= COLON constant_expression:ce						{: Logger.print("359 constant_expression: " + ce ); RESULT = ce; :}
+	| declarator:d COLON constant_expression:ce				{: Logger.print("360 declarator: " + d + " constant_expression: " + ce); RESULT = ce; :}
+	| declarator:d											{: Logger.print("361 declarator: " + d ); RESULT = d; :}
 	;
 
 enum_specifier
@@ -407,16 +407,16 @@ declarator
 
 direct_declarator
 	::= IDENTIFIER:d																				{: Logger.print("401 IDENTIFIER " + d ); RESULT = d; :}
-	| LPAR declarator RPAR
-	| direct_declarator LSQRBRK RSQRBRK
-	| direct_declarator LSQRBRK STAR RSQRBRK
-	| direct_declarator LSQRBRK STATIC type_qualifier_list assignment_expression RSQRBRK
-	| direct_declarator LSQRBRK STATIC assignment_expression RSQRBRK
-	| direct_declarator LSQRBRK type_qualifier_list STAR RSQRBRK
-	| direct_declarator LSQRBRK type_qualifier_list STATIC assignment_expression RSQRBRK
-	| direct_declarator LSQRBRK type_qualifier_list assignment_expression RSQRBRK
-	| direct_declarator LSQRBRK type_qualifier_list RSQRBRK
-	| direct_declarator LSQRBRK assignment_expression RSQRBRK
+	| LPAR declarator RPAR																		
+	| direct_declarator LSQRBRK RSQRBRK																
+	| direct_declarator LSQRBRK STAR RSQRBRK														
+	| direct_declarator LSQRBRK STATIC type_qualifier_list assignment_expression RSQRBRK			
+	| direct_declarator LSQRBRK STATIC assignment_expression RSQRBRK							
+	| direct_declarator LSQRBRK type_qualifier_list STAR RSQRBRK									
+	| direct_declarator LSQRBRK type_qualifier_list STATIC assignment_expression RSQRBRK			
+	| direct_declarator LSQRBRK type_qualifier_list assignment_expression RSQRBRK					
+	| direct_declarator LSQRBRK type_qualifier_list RSQRBRK										
+	| direct_declarator LSQRBRK assignment_expression:ae RSQRBRK									{: Logger.print("411 type_qualifier_list: " + ae ); RESULT = ae; :}
 	| direct_declarator:d LPAR parameter_type_list:p RPAR											{: Logger.print("412 direct_declarator " + d ); RESULT = new Function(d.toString(), (ArrayList<Parameter>) p); :}
 	| direct_declarator:d LPAR RPAR																	{: Logger.print("413 direct_declarator " + d ); RESULT = new Function(d.toString(), new ArrayList<Parameter>()); :}
 	| direct_declarator LPAR identifier_list RPAR													{: Logger.print("414 direct_declarator"); :}
@@ -548,8 +548,8 @@ block_item_list
 	;
 
 block_item
-	::= declaration:d 										{:  RESULT = d;  Logger.print("543 declaration: " + d);:}
-	| statement:s											{: RESULT = s;  Logger.print("544 statement: " + s);:}
+	::= declaration:d 										{: RESULT = d;  Logger.print("543 declaration: " + d);:}
+	| statement:s											{: RESULT = s;  Logger.print("544 statement: " + s); :}
 	;
 
 expression_statement

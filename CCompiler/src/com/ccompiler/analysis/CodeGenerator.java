@@ -146,10 +146,10 @@ public class CodeGenerator {
 
 	public void addCode(String assemblyString) {
 		assemblyCode += assemblyString + "\n";
-
+		/**
 		System.out.println("\n ############################################### \n");
 		System.out.println(getAssemblyCode());
-		System.out.println("\n ############################################### \n");
+		System.out.println("\n ############################################### \n");*/
 	}
 
 	public void addSwitch(Expression e) {

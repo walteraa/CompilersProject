@@ -12,6 +12,7 @@ import com.ccompiler.core.Function;
 import com.ccompiler.core.Identifier;
 import com.ccompiler.core.Operation;
 import com.ccompiler.core.Program;
+import com.ccompiler.core.Register;
 import com.ccompiler.core.ScopedEntity;
 import com.ccompiler.core.Switch;
 import com.ccompiler.core.Type;
@@ -201,11 +202,7 @@ public class Semantic {
 		if (!checkFunctionCall(functionName)) {
 			throw new SemanticException("Calling function not declared: " + functionName + "()");
 		}
-//		codeGenerator.addCode(": ADD SP, SP, #size");
-//		codeGenerator.addCode(": ST *ST, #");
-//		codeGenerator.addCode(": BR " + functionName);
-//		codeGenerator.addCode(":");
-//		codeGenerator.addCode(": SUB SP, SP, #size");
+		getCodeGenerator().generateCallFunction(functionName);
 	}
 
 	public void checkFunctionCallException(String functionName, Type[] types) {
@@ -213,13 +210,7 @@ public class Semantic {
 			throw new SemanticException(
 					"Calling function not declared: " + functionName + " " + Arrays.toString(types));
 		}
-		
 		getCodeGenerator().generateCallFunction(functionName);
-		// codeGenerator.addCode(": ADD SP, SP, #size");
-		// codeGenerator.addCode(": ST *ST, #");
-		// codeGenerator.addCode(": BR ");
-		// codeGenerator.addCode(":");
-		// codeGenerator.addCode(": SUB SP, SP, #size");
 	}
 
 	public boolean checkFunctionName(String functionName) {
@@ -273,7 +264,7 @@ public class Semantic {
 		f.setReturnedType(typeToCheck);
 		getCodeGenerator().StorageReturnedType(f, (Expression) e);
 	}
-
+	
 	public Expression getExpressionForOperation(Operation op, Expression e1, Expression e2) {
 
 		switch (op) {

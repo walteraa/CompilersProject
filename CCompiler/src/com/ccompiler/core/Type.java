@@ -13,7 +13,7 @@ public class Type extends NamedEntity implements Parameter {
 
 	@Override
 	public String toString() {
-		return "{ Type " + getName() + " }";
+		return getName();
 	}
 
 	@Override

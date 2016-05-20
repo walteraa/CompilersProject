@@ -268,6 +268,12 @@ public class Semantic {
 		}
 		return false;
 	}
+	
+	public void checkAssignmentType(Variable v, Expression e){
+		if(!v.getType().equals(e.getType())){
+			throw new SemanticException("Cast Error: cannot cast " + e.getType()+ " to " + v.getType());
+		}
+	}
 
 	public void checkReturnedType(Object e) {
 		Type typeToCheck;

@@ -41,7 +41,7 @@ public class Main {
 			if (s.toString().equals("#0")){
 				System.out.println("> SUCCESSFULL COMPILATION: " + filePath);
 				System.out.println("\n> GENERATED CODE:\n");
-				System.out.println(Semantic.getInstance().getAssemblyCode());
+				System.out.println(Semantic.getInstance().getCodeGenerator().getAssemblyCode());
 			} else {
 				System.out.println(s);
 			}

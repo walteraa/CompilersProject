@@ -87,9 +87,9 @@ non terminal external_declaration, function_definition, declaration_list;
 start with translation_unit;
 
 primary_expression
-	::= IDENTIFIER:i					{: Logger.print("90 IDENTIFIER: " + i); RESULT = Semantic.getInstance().getIdentifier((String) i); Semantic.getInstance().generateLDCode(new Expression((String) i)); :}
-	| constant:c						{: RESULT = c;  Logger.print("91 constant " + c); Semantic.getInstance().generateLDCode((Expression)c); :}
-	| string:s							{: RESULT = s;  Logger.print("92 string " + s); Semantic.getInstance().generateLDCode((Expression)s); :}
+	::= IDENTIFIER:i					{: Logger.print("90 IDENTIFIER: " + i); RESULT = Semantic.getInstance().getIdentifier((String) i); :}
+	| constant:c						{: RESULT = c;  Logger.print("91 constant " + c); :}
+	| string:s							{: RESULT = s;  Logger.print("92 string " + s);   :}
 	| LPAR expression:e RPAR			{: RESULT = e;  Logger.print("93 expression " + e); :}
 	| generic_selection:g 				{: RESULT = g;  Logger.print("94 generic_selection " + g); :}
 	;
@@ -97,10 +97,10 @@ primary_expression
 constant
 	::= I_CONSTANT:i				{: Logger.print("98 I_CONSTANT: " + i); RESULT = new Expression(new Type("int"), i.toString()); :}
 	| F_CONSTANT:f					{: Logger.print("99 F_CONSTANT: " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
-	| ENUMERATION_CONSTANT	/* after it has been defined as such */
+	| ENUMERATION_CONSTANT	
 	;
 
-enumeration_constant		/* before it has been defined as such */
+enumeration_constant
 	::= IDENTIFIER
 	;
 
@@ -145,7 +145,7 @@ unary_expression
 	::= postfix_expression:p					{: Logger.print("145 postfix_expression: " + p); RESULT = p; :} 
 	| INC_OP unary_expression:u					{: Logger.print("146 " + u); :}
 	| DEC_OP unary_expression:u					{: Logger.print("147 " + u ); :}
-	| unary_operator:u cast_expression:c 		{: Logger.print("148 " + u + " " + c); RESULT = c; :}
+	| unary_operator:u cast_expression:c 		{: Logger.print("148 unary_operator: " + u + " cast_expression: " + c); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.NOT_OP, (Expression) c, null); :}
 	| SIZEOF unary_expression:u					{: Logger.print("149 " + u); RESULT = u; :}
 	| SIZEOF LPAR type_name:t RPAR				{: Logger.print("150 " + t); RESULT = t; :}
 	| ALIGNOF LPAR type_name RPAR
@@ -167,15 +167,15 @@ cast_expression
 
 multiplicative_expression
 	::= cast_expression:c														{: Logger.print("169 cast_expression: " + c); RESULT = c; :}
-	| multiplicative_expression STAR cast_expression							{: Logger.print("170 "); :}
-	| multiplicative_expression DIVOP cast_expression							{: Logger.print("171 "); :}
-	| multiplicative_expression MODOP cast_expression							{: Logger.print("172 "); :}
+	| multiplicative_expression:m STAR cast_expression:c						{: Logger.print("170 multiplicative_expression: " + m + " cast_expression: " + c); RESULT = c; :}
+	| multiplicative_expression:m DIVOP cast_expression:c						{: Logger.print("171 multiplicative_expression: " + m + " cast_expression: " + c); RESULT = c; :}
+	| multiplicative_expression:m MODOP cast_expression:c						{: Logger.print("172 multiplicative_expression: " + m + " cast_expression: " + c); RESULT = c; :}
 	;
 
 additive_expression
 	::= multiplicative_expression:m												{: Logger.print("176 multiplicative_expression: " + m); RESULT = m; :}
 	| additive_expression:a PLUSOP multiplicative_expression:m					{: Logger.print("177 additive_expression: " + a + " multiplicative_expression: " + m); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.PLUS, (Expression) a, (Expression) m); :}
-	| additive_expression MINUSOP multiplicative_expression						{: Logger.print("178 multiplicative_expression: "); :}
+	| additive_expression:a MINUSOP multiplicative_expression:m					{: Logger.print("178 additive_expression: " + a + " multiplicative_expression: " + m); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.MINUS, (Expression) a, (Expression) m); :}
 	;
 
 shift_expression
@@ -215,12 +215,12 @@ inclusive_or_expression
 
 logical_and_expression
 	::= inclusive_or_expression:i												{: Logger.print("217 inclusive_or_expression: " + i); RESULT = i; :}
-	| logical_and_expression AND_OP inclusive_or_expression						{: Logger.print("218"); :}
+	| logical_and_expression:le AND_OP inclusive_or_expression:ie				{: Logger.print("218 logical_and_expression: " + le + " inclusive_or_expression: "  + ie); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.AND_OP, (Expression) le, (Expression) ie); :}
 	;
 
 logical_or_expression
 	::= logical_and_expression:l												{: Logger.print("222 logical_and_expression: " + l); RESULT = l; :}
-	| logical_or_expression OR_OP logical_and_expression						{: Logger.print("223"); :}
+	| logical_or_expression:le OR_OP logical_and_expression:ie					{: Logger.print("223 logical_and_expression: " + le + " inclusive_or_expression: "  + ie); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.OR_OP, (Expression) le, (Expression) ie); :}
 	;
 
 conditional_expression
@@ -281,7 +281,7 @@ init_declarator_list
 	;
 
 init_declarator
-	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var; Semantic.getInstance().generateSTCode(var); :}
+	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var; Semantic.getInstance().getCodeGenerator().assignmentDeclararion((Variable) var, (Expression) i );:}
 	| declarator:d										{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
 	;
 
@@ -518,8 +518,8 @@ statement
 	::= labeled_statement:s									{: RESULT = s; Logger.print("518 labeled_statement: " + s); :}
 	| compound_statement:s									{: RESULT = s; Logger.print("519 compound_statement: " + s); :}
 	| expression_statement:s								{: RESULT = s; Logger.print("520 expression_statement: " + s); :}	
-	| selection_statement:s									{: RESULT = s; Logger.print("521 " + s); :}	
-	| iteration_statement:s									{: RESULT = s; Logger.print("522 " + s); :}
+	| selection_statement:s									{: RESULT = s; Logger.print("521 selection_statement: " + s); :}	
+	| iteration_statement:s									{: RESULT = s; Logger.print("522 iteration_statement: " + s); :}
 	| jump_statement:s										{: RESULT = s; Logger.print("523 jump_statement:" + s); :}
 	;
 

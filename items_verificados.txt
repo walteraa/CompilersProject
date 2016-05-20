@@ -6,3 +6,7 @@ int max(float x, int y){
 //funciona cast automático de retorno float<->int e int<->char char(ou float) f = max(10, 'a');
 //O valor que a função deve retornar é int e ele érmite retornar o float(parametro x), cast automático
 //Se substituir x por um literal string "exemplo", deve dar erro de tipos
+
+//Checagem de atribuição; Deve dar erro de cast
+int x;
+x = "compiladores";

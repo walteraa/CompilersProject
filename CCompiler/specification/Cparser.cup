@@ -44,7 +44,7 @@ parser code {:
  * Terminals
  */
  
-terminal	IDENTIFIER, I_CONSTANT, F_CONSTANT, STRING_LITERAL, FUNC_NAME, SIZEOF;
+terminal	IDENTIFIER, I_CONSTANT, F_CONSTANT,C_CONSTANT, STRING_LITERAL, FUNC_NAME, SIZEOF;
 terminal	PTR_OP, INC_OP, DEC_OP, LEFT_OP, RIGHT_OP, LE_OP, GE_OP, EQ_OP, NE_OP;
 terminal	AND_OP, OR_OP, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN, ADD_ASSIGN;
 terminal	SUB_ASSIGN, LEFT_ASSIGN, RIGHT_ASSIGN, AND_ASSIGN;
@@ -65,6 +65,8 @@ terminal	ALIGNAS, ALIGNOF, ATOMIC, GENERIC, NORETURN, STATIC_ASSERT, THREAD_LOCA
 terminal COMMA, DOT, STAR, LSQRBRK, RSQRBRK, LT, GT, QUESTION, SEMICOLON, COLON, LPAR, RPAR, LBRK, RBRK;
 terminal SINGLEAND, SOROP, XOROP, ASSIGNMENT, PLUSOP, LOGNEGATION, MINUSOP, BINNEG, MODOP, DIVOP;
 
+
+
 /**
  * Non Terminals
  */
@@ -84,6 +86,11 @@ non terminal designation, designator_list, designator, static_assert_declaration
 non terminal block_item_list, block_item, expression_statement, selection_statement, iteration_statement, jump_statement, translation_unit;
 non terminal external_declaration, function_definition, declaration_list;
 
+
+precedence left PLUSOP, MINUSOP; 
+precedence left DIVOP; 
+
+
 start with translation_unit;
 
 primary_expression
@@ -96,8 +103,9 @@ primary_expression
 
 constant
 	::= I_CONSTANT:i				{: Logger.print("98 I_CONSTANT: " + i); RESULT = new Expression(new Type("int"), i.toString()); :}
-	| F_CONSTANT:f					{: Logger.print("99 F_CONSTANT: " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
-	| ENUMERATION_CONSTANT	
+	| C_CONSTANT:c					{:Logger.print("99 C_CONSTANT: " + c); RESULT = new Expression(new Type("char"), c.toString()); :}
+	| F_CONSTANT:f					{: Logger.print("100 F_CONSTANT: " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
+	| ENUMERATION_CONSTANT	/* after it has been defined as such */
 	;
 
 enumeration_constant
@@ -124,10 +132,10 @@ generic_association
 	;
 
 postfix_expression
-	::= primary_expression:p												{: Logger.print("127 " + p); RESULT = p; :}
-	| postfix_expression LSQRBRK expression:e RSQRBRK						{: Logger.print("128 " + e); :}
-	| postfix_expression:p LPAR RPAR										{: Logger.print("129 " + p); Semantic.getInstance().isFunction(p); Semantic.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
-	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("130 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
+	::= primary_expression:p												{: Logger.print("128 " + p); RESULT = p; :}
+	| postfix_expression LSQRBRK expression:e RSQRBRK						{: Logger.print("129 " + e); :}
+	| postfix_expression:p LPAR RPAR										{: Logger.print("130 " + p); Semantic.getInstance().isFunction(p); Semantic.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
+	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("131 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
 	| postfix_expression DOT IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
 	| postfix_expression:p INC_OP											{: Logger.print("133 postfix_expression: " + p); RESULT = p; :}
@@ -138,7 +146,7 @@ postfix_expression
 
 argument_expression_list
 	::= assignment_expression:a												{: RESULT = Util.newList( (Expression) a );  Logger.print("140 assignment_expression " + a); :} 
-	| argument_expression_list COMMA assignment_expression
+	| argument_expression_list:iList COMMA assignment_expression:e			 {: ((ArrayList<Expression>) iList).add((Expression)e); RESULT = iList; :}
 	;
 
 unary_expression
@@ -295,7 +303,7 @@ storage_class_specifier
 	;
 
 type_specifier
-	::= VOID
+	::= VOID	{: RESULT = new Type("void"); 			Logger.print("void"); :}
 	| CHAR		{: RESULT = new Type("char"); 			Logger.print("char"); :}
 	| SHORT		{: RESULT = new Type("short"); 			Logger.print("short"); :}	
 	| INT		{: RESULT = new Type("int"); 			Logger.print("int"); :}

@@ -12,6 +12,7 @@ import com.ccompiler.core.Function;
 import com.ccompiler.core.Identifier;
 import com.ccompiler.core.Operation;
 import com.ccompiler.core.Program;
+import com.ccompiler.core.Register;
 import com.ccompiler.core.ScopedEntity;
 import com.ccompiler.core.Switch;
 import com.ccompiler.core.Type;
@@ -83,7 +84,7 @@ public class Semantic {
 
 	public void addVariable(Variable v) {
 		if (checkVariableNameCurrentScope(v.getName()))
-			throw new SemanticException("Variable name already exists");
+			throw new SemanticException("Variable " + v.getName() + " already exists");
 
 		if (scopeStack.peek() != null) {
 			scopeStack.peek().addVariable(v);
@@ -157,7 +158,6 @@ public class Semantic {
 		if (!checkFunctionCall(functionName)) {
 			throw new SemanticException("Calling function not declared: " + functionName + "()");
 		}
-
 //		codeGenerator.addCode(": ADD SP, SP, #size");
 //		codeGenerator.addCode(": ST *ST, #");
 //		codeGenerator.addCode(": BR " + functionName);
@@ -170,7 +170,6 @@ public class Semantic {
 			throw new SemanticException(
 					"Calling function not declared: " + functionName + " " + Arrays.toString(types));
 		}
-
 		// codeGenerator.addCode(": ADD SP, SP, #size");
 		// codeGenerator.addCode(": ST *ST, #");
 		// codeGenerator.addCode(": BR ");
@@ -279,6 +278,11 @@ public class Semantic {
 	}
 
 	public CodeGenerator getCodeGenerator() {
-		return codeGenerator;
+		return codeGenerator;	
+	}
+
+	public void checkType(Variable v, Expression e){
+		if(!v.getType().equals(e.getType()) && !( "int".equals(v.getType().getName()) && "char".equals(e.getType().getName()) ||  "int".equals(v.getType().getName()) && "char".equals(e.getType().getName()) ) )
+			throw new SemanticException("Type error");
 	}
 }

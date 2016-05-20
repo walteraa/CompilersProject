@@ -298,7 +298,10 @@ public class Semantic {
 			getCodeGenerator().generateSUBCode();
 			return new Expression(new Type("int"));
 		case MULT:
-			break;
+			getCodeGenerator().generateLDCode(e1);
+			getCodeGenerator().generateLDCode(e2);
+			getCodeGenerator().generateMULCode();
+			return new Expression(new Type("int"));
 		case PERC:
 			break;
 		case PLUS:
@@ -307,7 +310,10 @@ public class Semantic {
 			getCodeGenerator().generateADDCode();
 			return new Expression(new Type("int"));
 		case DIV:
-			return new Expression(e1.getType());
+			getCodeGenerator().generateLDCode(e1);
+			getCodeGenerator().generateLDCode(e2);
+			getCodeGenerator().generateDIVCode();
+			return new Expression(new Type("int"));
 		}
 		
 		throw new SemanticException("Illegal Operation between " + e1.getType() + " and " + e2.getType());

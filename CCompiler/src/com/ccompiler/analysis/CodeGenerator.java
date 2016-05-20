@@ -90,6 +90,17 @@ public class CodeGenerator {
 		Register result = allocateRegister();
 		addCode(labels + ": MUL " + result + ", " + one + ", " + two);
 	}
+	
+	public void generateDIVCode() {
+		labels += 8;
+
+		Register one = registers[register - 1];
+		Register two = allocateRegister();
+
+		register++;
+		Register result = allocateRegister();
+		addCode(labels + ": DIV " + result + ", " + one + ", " + two);
+	}
 
 	public void generateMULCode(Register result, Register one, Expression exp) {
 		labels += 8;

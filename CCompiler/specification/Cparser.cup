@@ -175,8 +175,8 @@ cast_expression
 
 multiplicative_expression
 	::= cast_expression:c														{: Logger.print("169 cast_expression: " + c); RESULT = c; :}
-	| multiplicative_expression:m STAR cast_expression:c						{: Logger.print("170 multiplicative_expression: " + m + " cast_expression: " + c); RESULT = c; :}
-	| multiplicative_expression:m DIVOP cast_expression:c						{: Logger.print("171 multiplicative_expression: " + m + " cast_expression: " + c); RESULT = c; :}
+	| multiplicative_expression:m STAR cast_expression:c						{: Logger.print("170 multiplicative_expression: " + m + " cast_expression: " + c); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.MULT, (Expression) m, (Expression) c); :}
+	| multiplicative_expression:m DIVOP cast_expression:c						{: Logger.print("171 multiplicative_expression: " + m + " cast_expression: " + c); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.DIV, (Expression) m, (Expression) c); :}
 	| multiplicative_expression:m MODOP cast_expression:c						{: Logger.print("172 multiplicative_expression: " + m + " cast_expression: " + c); RESULT = c; :}
 	;
 

@@ -29,7 +29,7 @@ public class CodeGenerator {
 	}
 
 	private String initAssemblyCode() {
-		return "100: LD SP, 2000\n";
+		return "100: LD SP, 4000\n";
 	}
 
 	public void assignmentDeclararion(Variable var, Object obj) {
@@ -242,7 +242,12 @@ public class CodeGenerator {
 		if (returnedExpression.getValue() != null) {
 			generateLDCode(returnedExpression);
 			generateSTCode(new Expression(function.getName()));
-			generateHalt();
+			
+			if(function.getName().equals("main")){
+				generateHalt();
+			} else {
+				generateBRCode(Register._SP);
+			}
 		} else {
 			if (returnedExpression.getName() != null) {
 				generateLDCode(returnedExpression);

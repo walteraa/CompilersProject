@@ -238,7 +238,7 @@ conditional_expression
 
 assignment_expression
 	::= conditional_expression:e												{: Logger.print("232 conditional_expression: " + e); RESULT = e; :}
-	| unary_expression:u assignment_operator:o assignment_expression:e			{: Logger.print("233 unary_expression: " + u + " assignment_operator: " + o + " assignment_expression: " + e); RESULT = e; :}
+	| unary_expression:u assignment_operator:o assignment_expression:e			{: Logger.print("233 unary_expression: " + u + " assignment_operator: " + o + " assignment_expression: " + e); RESULT = e; Variable v = new Variable(u.toString(), new Type("UNKNOWN")); Semantic.getInstance().getCodeGenerator().assignmentDeclararion(v, e); :}
 	;
 
 assignment_operator
@@ -554,7 +554,7 @@ block_item
 
 expression_statement
 	::= SEMICOLON							{: Logger.print("548 expression_statement"); :}
-	| expression:e SEMICOLON					{: RESULT =  e; Logger.print("549 expression_statement"); :}
+	| expression:e SEMICOLON				{: RESULT =  e; Logger.print("549 expression_statement " + e); :}
 	;
 
 selection_statement

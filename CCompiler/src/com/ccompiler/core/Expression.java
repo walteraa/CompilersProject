@@ -27,6 +27,8 @@ public class Expression extends NamedEntity {
 		return type;
 	}
 	
+	
+	
 	public void setType(Type type) {
 		if (!getType().equals(new Type("UNKNOWN")) && !type.equals(getType()))
 			throw new SemanticException("Illegal Type Assignment " + type + " and " + getType());
@@ -46,6 +48,8 @@ public class Expression extends NamedEntity {
 			setType(exp.getType());
 		this.value = exp.getValue();
 	}
+	
+	
 	
 	@Override
 	public int hashCode() {

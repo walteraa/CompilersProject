@@ -1,15 +1,23 @@
-char init(){
- return (char) 1.0;
-}
 int main() {
-    int c;
- 
-    
-    /*for loop*/ 
- 
-    int y = 1.0;
-    for ( c = 1 ; c <= 10 ; c++ )
-        init();
- 
-    return 0;
+ 	int num = 10;
+	int x = 0;
+	int z = 10;
+	switch (num)
+        {
+        	case 9:
+                	x = z;
+			x++;
+			z++;
+        	break;
+        	case 10:
+                	x = 2;
+        	break;
+        	case 11:
+                	x = 3;
+        	break;
+        	default:
+                	x += 4;
+        }
+	
+   return 0;   
 }

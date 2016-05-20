@@ -30,6 +30,7 @@ public class Semantic {
 	public static ArrayList<String> valores = new ArrayList<String>();
 	private static Semantic sAnalysis;
 
+	
 	private CodeGenerator codeGenerator = new CodeGenerator();
 
 	public static Semantic getInstance() {
@@ -58,6 +59,26 @@ public class Semantic {
 
 		if (scoped instanceof Function)
 			((Function) scoped).validateReturnedType();
+		if(scoped instanceof Case){
+			System.out.println("GET OUT OF CASE");
+			getCodeGenerator().addCase((Case) scoped);
+		}
+	}
+	
+	public void exitCaseScope(){
+		ScopedEntity scoped = scopeStack.pop();
+		if(scoped != null && scoped instanceof Case){
+			System.out.println("GET OUT OF CASE");
+			getCodeGenerator().addCase((Case) scoped);
+		}
+	}
+	
+	public void incrementAtualScope(){
+		if (scopeStack.peek() != null) {
+			if(scopeStack.peek() instanceof Case){
+				((Case)scopeStack.peek()).incrementSize();
+			}
+		}
 	}
 
 	public ScopedEntity getCurrentScope() {
@@ -70,10 +91,24 @@ public class Semantic {
 		createNewScope(f);
 	}
 
+	
+	public void createSwitch(Expression e){
+		createNewScope(new Switch(e));
+	}
+	
+	
+	public void createCase(Expression e){
+		System.out.println("CASE CREATED");
+		createNewScope(new Case(e));
+	}
+	
+		
 	/** Switch Case Semantic */
 	private Switch switchCase = new Switch();
 
 	public void checkSwitchCase(Expression e) {
+		
+		
 		this.switchCase.setExpression(e);
 		// TODO Ruan: resetar o switch depois de analisar e gerar código
 	}
@@ -92,7 +127,15 @@ public class Semantic {
 			cProgram.addVariable(v);
 		}
 	}
-
+	
+	public Variable getVariable(String name){
+		
+		if (scopeStack.isEmpty())
+			return cProgram.getVariable().get(name);
+		else
+			return scopeStack.peek().getVariable().get(name);
+	}
+	
 	public Identifier getIdentifier(String name) {
 		if (!checkVariableNameAllScopes(name) && !checkFunctionName(name))
 			throw new SemanticException("Identifier name doesn't exists: " + name);

@@ -1,5 +1,6 @@
 package com.ccompiler.analysis;
 
+import com.ccompiler.core.Case;
 import com.ccompiler.core.Expression;
 import com.ccompiler.core.Register;
 import com.ccompiler.core.Type;
@@ -120,6 +121,30 @@ public class CodeGenerator {
 		System.out.println("\n ############################################### \n");
 		System.out.println(getAssemblyCode());
 		System.out.println("\n ############################################### \n");*/
+	}
+	
+	public void addSwitch(Expression e){
+		if (e.getAssemblyValue() != null) {
+			register++;
+			labels += 8;
+			addCode(labels + ":LD " + registers[register] + ", " + e.getAssemblyValue());
+		}
+	}
+	
+	
+	public void addCase(Case c){
+			System.out.println("Size of Case:" + c.getSize());
+			register++;
+			int startLabel = labels;
+			labels += 8;
+			addCode(labels + ":LD " + registers[register] +", "+ c.getExpression().getAssemblyValue());
+			labels += 8;
+			addCode(labels + ":SUB " + registers[register] + ", " + registers[register] + ", " + registers[register-1]);
+			labels += 8;
+			addCode(labels + ":BLTZ " + registers[register] + ", " + (labels+8 + (8*c.getSize()) ));
+			labels += 8;
+			addCode(labels + ":BGTZ " + registers[register] + ", " + (labels + c.getSize()*8));
+			register--;
 	}
 	
 	public String getAssemblyCode(){

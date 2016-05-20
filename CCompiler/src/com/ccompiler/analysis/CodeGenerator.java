@@ -193,6 +193,16 @@ public class CodeGenerator {
 		addCode(labels + ": BR " + address);
 	}
 	
+	public void generateBRCode(Register register){
+		labels += 8;
+		addCode(labels + ": BR " + register);
+	}
+	
+	public void generateHalt(){
+		labels += 8;
+		addCode(labels + ": halt");
+	}
+	
 	public String getAssemblyCode(){
 		return assemblyCode;
 	}
@@ -204,11 +214,13 @@ public class CodeGenerator {
 	}
 
 	public void StorageReturnedType(Function function, Expression returnedExpression) {
-		if (returnedExpression.getValue() == null) {
-			generateSTCode(new Expression(function.getName()));
-		} else {
+		if (returnedExpression.getValue() != null) {
 			generateLDCode(returnedExpression);
 			generateSTCode(new Expression(function.getName()));
+			generateHalt();
+		} else {
+			generateSTCode(new Expression(function.getName()));
+			generateBRCode(Register._SP);
 		}
 	}
 }

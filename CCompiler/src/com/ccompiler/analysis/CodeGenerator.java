@@ -189,13 +189,13 @@ public class CodeGenerator {
 		labels += 8;
 	
 		if(c instanceof Default){
-			addCode(labels + ": BLTZ " + allocateRegister() + ", #switchSize");
+			addCode(labels + ": BLTZ " + allocateRegister() + ", #switchEnd");
 			labels += 8;
-			addCode(labels + ": BGTZ " + allocateRegister() + ", #switchSize");
+			addCode(labels + ": BGTZ " + allocateRegister() + ", #switchEnd");
 		}else{
-			addCode(labels + ": BLTZ " + allocateRegister() + ", #caseSize");
+			addCode(labels + ": BLTZ " + allocateRegister() + ", #caseEnd");
 			labels += 8;
-			addCode(labels + ": BGTZ " + allocateRegister() + ", #caseSize");
+			addCode(labels + ": BGTZ " + allocateRegister() + ", #caseEnd");
 			
 		}
 		register--;

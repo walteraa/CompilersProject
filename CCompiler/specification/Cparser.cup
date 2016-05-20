@@ -533,8 +533,8 @@ statement
 
 labeled_statement
 	::= IDENTIFIER:i COLON statement:s						{: Logger.print("527 IDENTIFIER: " + i + " statement: " + s); RESULT = s; :}
-	| DEFAULT:d {: Semantic.getInstance().exitCaseScope(); :} COLON {: Logger.print("536 expression: " + d + " statement: "); Semantic.getInstance().createCase(new Expression(new Type("int"))); :} statement:s							{: Logger.print("529 DEFAULT: " + d + " statement: " + s); RESULT = s; :}
-	| CASE {: Semantic.getInstance().exitCaseScope(); :} constant_expression:ce COLON {: Logger.print("536 expression: " + ce + " statement: "); Semantic.getInstance().createCase((Expression) ce); :}  statement:s 	/*{: Semantic.getInstance().exitCurrentScope(); :}*/	
+	| DEFAULT:d /*{: Semantic.getInstance().exitCaseScope(); :}*/ COLON {: Logger.print("536 expression: " + d + " statement: "); Semantic.getInstance().createDefault(new Expression(new Type("int"))); :} statement:s							{: Logger.print("529 DEFAULT: " + d + " statement: " + s); RESULT = s; Semantic.getInstance().exitCurrentScope(); :}
+	| CASE /*{: Semantic.getInstance().exitCaseScope(); :}*/ constant_expression:ce COLON {: Logger.print("536 expression: " + ce + " statement: "); Semantic.getInstance().createCase((Expression) ce); :}  statement:s 	{: Semantic.getInstance().exitCurrentScope(); :}	
 	;
 
 compound_statement
@@ -560,7 +560,7 @@ expression_statement
 selection_statement
 	::= IF LPAR expression RPAR statement ELSE statement
 	| IF LPAR expression RPAR statement
-	| SWITCH LPAR expression:e RPAR{: Logger.print("555 expression: " + e + " statement: "); Semantic.getInstance().createSwitch((Expression) e);  Semantic.getInstance().getCodeGenerator().addSwitch((Expression) e); :} statement:s	{: Semantic.getInstance().exitCurrentScope(); :}					
+	| SWITCH LPAR expression:e RPAR{: Logger.print("555 expression: " + e + " statement: "); Semantic.getInstance().createSwitch((Expression) e); :} statement:s	{: Semantic.getInstance().exitCurrentScope(); :}					
 	;
 
 iteration_statement
@@ -575,7 +575,7 @@ iteration_statement
 jump_statement
 	::= GOTO IDENTIFIER SEMICOLON
 	| CONTINUE SEMICOLON					{: Logger.print("569 CONTINUE ;"); :} 
-	| BREAK SEMICOLON						{: Logger.print("570 BREAK ;"); :}
+	| BREAK SEMICOLON						{: Semantic.getInstance().putBreakInCase(); Logger.print("570 BREAK ;"); :}
 	| RETURN SEMICOLON						{: Logger.print("571 BREAK ;"); :}
 	| RETURN expression:e SEMICOLON			{: Logger.print("572 RETURN EXPRESSION: " + e); Semantic.getInstance().checkReturnedType(e); RESULT = e; :}
 	;

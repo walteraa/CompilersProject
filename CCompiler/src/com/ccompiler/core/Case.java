@@ -5,13 +5,13 @@ import java.util.List;
 
 import com.ccompiler.util.SemanticException;
 
-public class Case extends ScopedEntity{
+public class Case extends SwitchCase{
 	
 	private Expression expression;
 	List<Expression> statements;
 	int sizeOfElements = 0;
-	public Case(Expression expression) {
-		super("case");
+	public Case(Expression expression, Register r) {
+		super("case", r);
 		this.expression = expression;
 		checkExpression(expression);
 		statements = new LinkedList<Expression>();

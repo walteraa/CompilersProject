@@ -5,18 +5,18 @@ import java.util.List;
 
 import com.ccompiler.util.SemanticException;
 
-public class Switch extends ScopedEntity{
+public class Switch extends SwitchCase{
 
 	private List<Case> cases;
 	private Expression expression;
 	
-	public Switch() {
-		super("switch");
+	public Switch(Register r) {
+		super("switch", r);
 		this.cases = new ArrayList<Case>();
 	}
 
-	public Switch(Expression expression) {
-		super("switch");
+	public Switch(Expression expression, Register r) {
+		super("switch", r );
 		this.expression = expression;
 		this.cases = new ArrayList<Case>();
 		checkExpression(expression);

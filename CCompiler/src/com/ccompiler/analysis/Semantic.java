@@ -88,6 +88,7 @@ public class Semantic {
 		cProgram.checkOverload(f);
 		cProgram.addFunction(f);
 		createNewScope(f);
+		getCodeGenerator().addFunctionAddress(f.getName());
 	}
 
 	
@@ -212,6 +213,8 @@ public class Semantic {
 			throw new SemanticException(
 					"Calling function not declared: " + functionName + " " + Arrays.toString(types));
 		}
+		
+		getCodeGenerator().generateCallFunction(functionName);
 		// codeGenerator.addCode(": ADD SP, SP, #size");
 		// codeGenerator.addCode(": ST *ST, #");
 		// codeGenerator.addCode(": BR ");
@@ -268,10 +271,7 @@ public class Semantic {
 		}
 
 		f.setReturnedType(typeToCheck);
-	}
-
-	private boolean checkIsNumber(Type t) {
-		return t.equals(new Type("int")) || t.equals(new Type("float"));
+		getCodeGenerator().StorageReturnedType(f, (Expression) e);
 	}
 
 	public Expression getExpressionForOperation(Operation op, Expression e1, Expression e2) {

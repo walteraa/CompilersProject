@@ -49,8 +49,6 @@ public class Expression extends NamedEntity {
 		this.value = exp.getValue();
 	}
 	
-	
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

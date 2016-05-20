@@ -135,7 +135,7 @@ postfix_expression
 	::= primary_expression:p												{: Logger.print("128 " + p); RESULT = p; :}
 	| postfix_expression LSQRBRK expression:e RSQRBRK						{: Logger.print("129 " + e); :}
 	| postfix_expression:p LPAR RPAR										{: Logger.print("130 " + p); Semantic.getInstance().isFunction(p); Semantic.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
-	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("131 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
+	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("131 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); RESULT = p; :}
 	| postfix_expression DOT IDENTIFIER
 	| postfix_expression PTR_OP IDENTIFIER
 	| postfix_expression:p INC_OP											{: Logger.print("133 postfix_expression: " + p); RESULT = p; :}
@@ -289,8 +289,8 @@ init_declarator_list
 	;
 
 init_declarator
-	::= declarator:d {: Logger.print("this is executed after"); :}  ASSIGNMENT initializer:i	{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var;  Logger.print("The variable d: " + d); Semantic.getInstance().getCodeGenerator().assignmentDeclararion((Variable) var, (Expression) i );:}
-	| declarator:d										{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
+	::= declarator:d {: Logger.print("this is executed after"); :}  ASSIGNMENT initializer:i	{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var;  Logger.print("The variable d: " + d); Semantic.getInstance().getCodeGenerator().assignmentDeclararion((Variable) var, i );:}
+	| declarator:d																				{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
 	;
 
 storage_class_specifier

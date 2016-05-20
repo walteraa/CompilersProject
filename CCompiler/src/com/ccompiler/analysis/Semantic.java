@@ -12,7 +12,6 @@ import com.ccompiler.core.Function;
 import com.ccompiler.core.Identifier;
 import com.ccompiler.core.Operation;
 import com.ccompiler.core.Program;
-import com.ccompiler.core.Register;
 import com.ccompiler.core.ScopedEntity;
 import com.ccompiler.core.Switch;
 import com.ccompiler.core.Type;
@@ -246,10 +245,15 @@ public class Semantic {
 			getCodeGenerator().generateADDCode();
 			return new Expression(new Type("int"));
 		case EQ_OP:
+			break;
 		case GE_OP:
+			break;
 		case LE_OP:
+			break;
 		case LESS_THAN:
+			break;
 		case MORE_THAN:
+			break;
 		case NOT_OP:
 			getCodeGenerator().generateLDCode(e1);
 			getCodeGenerator().generateNOTCode();
@@ -260,7 +264,9 @@ public class Semantic {
 			getCodeGenerator().generateSUBCode();
 			return new Expression(new Type("int"));
 		case MULT:
+			break;
 		case PERC:
+			break;
 		case PLUS:
 			getCodeGenerator().generateLDCode(e1);
 			getCodeGenerator().generateLDCode(e2);

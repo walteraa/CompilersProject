@@ -68,9 +68,13 @@ public class Semantic {
 	}
 	
 	public void putBreakInCase(){
-		if(scopeStack.peek() instanceof Case){
+		if(scopeStack.peek() instanceof SwitchCase){
+			
+			System.out.println("Break find in case scope");
 			Semantic.getInstance().getCodeGenerator().addOutSwitch();
 			
+		}else{
+			System.out.println("Break find out of case scope");
 		}
 	}
 	

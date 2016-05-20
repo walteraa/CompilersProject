@@ -1,0 +1,594 @@
+package com.ccompiler.analysis;
+
+import java_cup.runtime.*;
+import com.ccompiler.util.*;
+import com.ccompiler.core.*;
+import java.util.ArrayList;
+import java.util.List;
+
+init with {: Semantic.parser = this;              :};
+
+parser code {:
+    
+    public void report_error(String message, Object info) {
+   
+        StringBuffer m = new StringBuffer("Error");
+   
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {
+                /* Add to the end of the StringBuffer error message
+                   the line number of the error in the input. */
+                m.append(" in line "+(s.left+1));   
+                /* Check if the column number in the input is greater
+                   or equal to zero. */
+                if (s.right >= 0)                    
+                    /* Add to the end of the StringBuffer error message
+                       the column number of the error in the input. */
+                    m.append(", column "+(s.right+1));
+            }
+        }
+   
+
+        m.append(" : "+message);
+        System.err.println(m);
+    }
+
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+:};
+
+/**
+ * Terminals
+ */
+ 
+terminal	IDENTIFIER, I_CONSTANT, F_CONSTANT,C_CONSTANT, STRING_LITERAL, FUNC_NAME, SIZEOF;
+terminal	PTR_OP, INC_OP, DEC_OP, LEFT_OP, RIGHT_OP, LE_OP, GE_OP, EQ_OP, NE_OP;
+terminal	AND_OP, OR_OP, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN, ADD_ASSIGN;
+terminal	SUB_ASSIGN, LEFT_ASSIGN, RIGHT_ASSIGN, AND_ASSIGN;
+terminal	XOR_ASSIGN, OR_ASSIGN;
+terminal	TYPEDEF_NAME, ENUMERATION_CONSTANT;
+
+terminal	TYPEDEF, EXTERN, STATIC, AUTO, REGISTER, INLINE;
+terminal	CONST, RESTRICT, VOLATILE;
+terminal	BOOL, CHAR, SHORT, INT, LONG, SIGNED, UNSIGNED, FLOAT, DOUBLE, VOID;
+terminal	COMPLEX, IMAGINARY; 
+terminal	STRUCT, UNION, ENUM, ELLIPSIS;
+
+terminal	CASE, DEFAULT, IF, ELSE, SWITCH, WHILE, DO, FOR, GOTO, CONTINUE, BREAK, RETURN;
+
+terminal	ALIGNAS, ALIGNOF, ATOMIC, GENERIC, NORETURN, STATIC_ASSERT, THREAD_LOCAL;
+
+/**Terminals added**/
+terminal COMMA, DOT, STAR, LSQRBRK, RSQRBRK, LT, GT, QUESTION, SEMICOLON, COLON, LPAR, RPAR, LBRK, RBRK;
+terminal SINGLEAND, SOROP, XOROP, ASSIGNMENT, PLUSOP, LOGNEGATION, MINUSOP, BINNEG, MODOP, DIVOP;
+
+/**
+ * Non Terminals
+ */
+ 
+non terminal primary_expression, constant, enumeration_constant, string, generic_selection, generic_assoc_list;
+non terminal generic_association, postfix_expression, argument_expression_list, unary_expression, unary_operator;
+non terminal cast_expression, multiplicative_expression, additive_expression, shift_expression, relational_expression;
+non terminal equality_expression, and_expression, exclusive_or_expression, inclusive_or_expression, logical_and_expression;
+non terminal logical_or_expression, conditional_expression, assignment_expression, assignment_operator, expression;
+non terminal constant_expression, declaration, declaration_specifiers, init_declarator_list, init_declarator;
+non terminal storage_class_specifier, type_specifier, struct_or_union_specifier, struct_or_union, struct_declaration_list;
+non terminal struct_declaration, specifier_qualifier_list, struct_declarator_list, struct_declarator, enum_specifier;
+non terminal enumerator_list, enumerator, atomic_type_specifier, type_qualifier, function_specifier, alignment_specifier;
+non terminal declarator, direct_declarator, pointer, type_qualifier_list, parameter_type_list, parameter_list, parameter_declaration;
+non terminal identifier_list, type_name, abstract_declarator, direct_abstract_declarator, initializer, initializer_list;
+non terminal designation, designator_list, designator, static_assert_declaration, statement, labeled_statement, compound_statement;
+non terminal block_item_list, block_item, expression_statement, selection_statement, iteration_statement, jump_statement, translation_unit;
+non terminal external_declaration, function_definition, declaration_list;
+
+start with translation_unit;
+
+primary_expression
+	::= IDENTIFIER:i					{: Logger.print("90 IDENTIFIER: " + i); RESULT = Semantic.getInstance().getIdentifier((String) i); Semantic.getInstance().generateLDCode(new Expression((String) i)); :}
+	| constant:c						{: RESULT = c;  Logger.print("91 constant " + c); Semantic.getInstance().generateLDCode((Expression)c); :}
+	| string:s							{: RESULT = s;  Logger.print("92 string " + s); Semantic.getInstance().generateLDCode((Expression)s); :}
+	| LPAR expression:e RPAR			{: RESULT = e;  Logger.print("93 expression " + e); :}
+	| generic_selection:g 				{: RESULT = g;  Logger.print("94 generic_selection " + g); :}
+	;
+
+constant
+	::= I_CONSTANT:i				{: Logger.print("98 I_CONSTANT: " + i); RESULT = new Expression(new Type("int"), i.toString()); :}
+	| C_CONSTANT	:c				{:Logger.print("99 C_CONSTANT: " + c); RESULT = new Expression(new Type("char"), c.toString()); :}
+	| F_CONSTANT:f					{: Logger.print("100 F_CONSTANT: " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
+	| ENUMERATION_CONSTANT	/* after it has been defined as such */
+	;
+
+enumeration_constant		/* before it has been defined as such */
+	::= IDENTIFIER
+	;
+
+string
+	::= STRING_LITERAL:s					{: Logger.print("108 STRING_LITERAL: " + s); RESULT = new Expression(new Type("char*"), s.toString()); :} 
+	| FUNC_NAME:f							{: Logger.print("109 FUNC_NAME: " + f); :}
+	;
+
+generic_selection
+	::= GENERIC LPAR assignment_expression COMMA generic_assoc_list RPAR
+	;
+
+generic_assoc_list
+	::= generic_association
+	| generic_assoc_list COMMA generic_association
+	;
+
+generic_association
+	::= type_name COLON assignment_expression
+	| DEFAULT COLON assignment_expression
+	;
+
+postfix_expression
+	::= primary_expression:p												{: Logger.print("127 " + p); RESULT = p; :}
+	| postfix_expression LSQRBRK expression:e RSQRBRK						{: Logger.print("128 " + e); :}
+	| postfix_expression:p LPAR RPAR										{: Logger.print("129 " + p); Semantic.getInstance().isFunction(p); Semantic.getInstance().checkFunctionCallException(((Function) p).getName()); RESULT = p; :}
+	| postfix_expression:p LPAR argument_expression_list:i RPAR				{: Logger.print("130 " + p + " " + i); Semantic.getInstance().checkFunctionCallException(((Function) p).getName(), Util.convertToTypeArray((ArrayList<Expression>) i)); :}
+	| postfix_expression DOT IDENTIFIER
+	| postfix_expression PTR_OP IDENTIFIER
+	| postfix_expression:p INC_OP											{: Logger.print("133 postfix_expression: " + p); RESULT = p; :}
+	| postfix_expression DEC_OP
+	| LPAR type_name RPAR LBRK initializer_list RBRK
+	| LPAR type_name RPAR LBRK initializer_list COMMA RBRK
+	;
+
+argument_expression_list
+	::= assignment_expression:a												{: RESULT = Util.newList( (Expression) a );  Logger.print("140 assignment_expression " + a); :} 
+	| argument_expression_list COMMA assignment_expression
+	;
+
+unary_expression
+	::= postfix_expression:p					{: Logger.print("145 postfix_expression: " + p); RESULT = p; :} 
+	| INC_OP unary_expression:u					{: Logger.print("146 " + u); :}
+	| DEC_OP unary_expression:u					{: Logger.print("147 " + u ); :}
+	| unary_operator:u cast_expression:c 		{: Logger.print("148 " + u + " " + c); RESULT = c; :}
+	| SIZEOF unary_expression:u					{: Logger.print("149 " + u); RESULT = u; :}
+	| SIZEOF LPAR type_name:t RPAR				{: Logger.print("150 " + t); RESULT = t; :}
+	| ALIGNOF LPAR type_name RPAR
+	;
+
+unary_operator
+	::= SINGLEAND			{: RESULT = new Node("&", "primario"); Logger.print("&");:}
+	| STAR					{: RESULT = new Node("*", "primario"); Logger.print("*");:}
+	| PLUSOP				{: RESULT = new Node("+", "primario"); Logger.print("+");:}
+	| MINUSOP				{: RESULT = new Node("-", "primario"); Logger.print("-");:}
+	| BINNEG				{: RESULT = new Node("~", "primario"); Logger.print("~");:}
+	| LOGNEGATION			{: RESULT = new Node("!", "primario"); Logger.print("!");:}
+	;
+
+cast_expression
+	::= unary_expression:u														{: Logger.print("164 unary_expression: " + u); RESULT = u; :}
+	| LPAR type_name RPAR cast_expression
+	;
+
+multiplicative_expression
+	::= cast_expression:c														{: Logger.print("169 cast_expression: " + c); RESULT = c; :}
+	| multiplicative_expression STAR cast_expression							{: Logger.print("170 "); :}
+	| multiplicative_expression DIVOP cast_expression							{: Logger.print("171 "); :}
+	| multiplicative_expression MODOP cast_expression							{: Logger.print("172 "); :}
+	;
+
+additive_expression
+	::= multiplicative_expression:m												{: Logger.print("176 multiplicative_expression: " + m); RESULT = m; :}
+	| additive_expression:a PLUSOP multiplicative_expression:m					{: Logger.print("177 additive_expression: " + a + " multiplicative_expression: " + m); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.PLUS, (Expression) a, (Expression) m); :}
+	| additive_expression MINUSOP multiplicative_expression						{: Logger.print("178 multiplicative_expression: "); :}
+	;
+
+shift_expression
+	::= additive_expression:a													{: Logger.print("182 additive_expression: " + a); RESULT = a; :}
+	| shift_expression:s LEFT_OP additive_expression:a							{: Logger.print("183 shift_expression: " + s + " additive_expression: " + a); :}
+	| shift_expression:s RIGHT_OP additive_expression:a							{: Logger.print("184 shift_expression: " + s + " additive_expression: " + a); :}
+	;
+
+relational_expression
+	::= shift_expression:s														{: Logger.print("188 shift_expression: " + s); RESULT = s; :}
+	| relational_expression:r LT shift_expression:s								{: Logger.print("189 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.LESS_THAN, (Expression) r, (Expression) s); :}
+	| relational_expression:r GT shift_expression:s								{: Logger.print("190 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.MORE_THAN, (Expression) r, (Expression) s); :}
+	| relational_expression:r LE_OP shift_expression:s							{: Logger.print("191 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.LE_OP, (Expression) r, (Expression) s); :}
+	| relational_expression:r GE_OP shift_expression:s							{: Logger.print("192 relational_expression: " + r + " shift_expression: " + s); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.GE_OP, (Expression) r, (Expression) s); :}
+	;
+
+equality_expression
+	::= relational_expression:r													{: Logger.print("196 relational_expression: " + r); RESULT = r; :}
+	| equality_expression:e EQ_OP relational_expression:r						{: Logger.print("197 equality_expression: " + e + " " + r); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.EQ_OP, (Expression) e, (Expression) r); :}
+	| equality_expression:e NE_OP relational_expression:r						{: Logger.print("198 equality_expression: " + e + " " + r); RESULT = Semantic.getInstance().getExpressionForOperation(Operation.NE_OP, (Expression) e, (Expression) r); :}
+	;
+
+and_expression
+	::= equality_expression:e													{: Logger.print("202 equality_expression: " + e); RESULT = e; :}
+	| and_expression SINGLEAND equality_expression								{: Logger.print("203"); :}
+	;
+
+exclusive_or_expression
+	::= and_expression:a														{: Logger.print("207 and_expression: " + a); RESULT = a; :}
+	| exclusive_or_expression XOROP and_expression								{: Logger.print("208"); :}
+	;
+
+inclusive_or_expression
+	::= exclusive_or_expression:e												{: Logger.print("212 exclusive_or_expression: " + e); RESULT = e; :}
+	| inclusive_or_expression SOROP exclusive_or_expression						{: Logger.print("213"); :}
+	;
+
+logical_and_expression
+	::= inclusive_or_expression:i												{: Logger.print("217 inclusive_or_expression: " + i); RESULT = i; :}
+	| logical_and_expression AND_OP inclusive_or_expression						{: Logger.print("218"); :}
+	;
+
+logical_or_expression
+	::= logical_and_expression:l												{: Logger.print("222 logical_and_expression: " + l); RESULT = l; :}
+	| logical_or_expression OR_OP logical_and_expression						{: Logger.print("223"); :}
+	;
+
+conditional_expression
+	::= logical_or_expression:l 												{: Logger.print("227 logical_or_expression: " + l); RESULT = l; :}  
+	| logical_or_expression QUESTION expression COLON conditional_expression	{: Logger.print("228"); :}
+	;
+
+assignment_expression
+	::= conditional_expression:e												{: Logger.print("232 conditional_expression: " + e); RESULT = e; :}
+	| unary_expression:u assignment_operator:o assignment_expression:e			{: Logger.print("233 unary_expression: " + u + " assignment_operator: " + o + " assignment_expression: " + e); RESULT = e; :}
+	;
+
+assignment_operator
+	::= ASSIGNMENT		{: RESULT = new Node("=", "primario");  Logger.print("=");:}
+	| MUL_ASSIGN		{: RESULT = new Node("*=", "primario"); Logger.print("*=");:}
+	| DIV_ASSIGN		{: RESULT = new Node("/=", "primario"); Logger.print("/=");:}
+	| MOD_ASSIGN		{: RESULT = new Node("%=", "primario"); Logger.print("%=");:}
+	| ADD_ASSIGN		{: RESULT = new Node("+=", "primario"); Logger.print("+=");:}
+	| SUB_ASSIGN		{: RESULT = new Node("-=", "primario"); Logger.print("-=");:}
+	| LEFT_ASSIGN		{: RESULT = new Node("<<=","primario"); Logger.print("<<=");:}
+	| RIGHT_ASSIGN		{: RESULT = new Node(">>=","primario"); Logger.print(">>=");:} 
+	| AND_ASSIGN		{: RESULT = new Node("&=", "primario"); Logger.print("&=");:} 
+	| XOR_ASSIGN		{: RESULT = new Node("^=", "primario"); Logger.print("^=");:}
+	| OR_ASSIGN			
+	;
+
+expression
+	::= assignment_expression:a							{: Logger.print("251 assignment_expression: " + a); RESULT = a; :}
+	| expression:e COMMA assignment_expression:a		{: Logger.print("252 expression: " + e + " assignment_expression: " + a); :} 
+	;
+
+constant_expression
+	::= conditional_expression:c						{: Logger.print("256 conditional_expression: " + c); RESULT = c; :}
+	;
+
+declaration
+	::= declaration_specifiers:d SEMICOLON
+	| declaration_specifiers:d init_declarator_list:i SEMICOLON 		{: Logger.print("261 " + d + " " + i); ((Variable) i).setType((Type) d); Semantic.getInstance().addVariable((Variable) i); RESULT = i; :}
+	| static_assert_declaration
+	;
+
+declaration_specifiers
+	::= storage_class_specifier declaration_specifiers
+	| storage_class_specifier
+	| type_specifier declaration_specifiers
+	| type_specifier:s 													{: Logger.print("269 type_specifier: " + s); RESULT = s; :} 
+	| type_qualifier declaration_specifiers
+	| type_qualifier
+	| function_specifier declaration_specifiers
+	| function_specifier
+	| alignment_specifier declaration_specifiers
+	| alignment_specifier
+	;
+
+init_declarator_list
+	::= init_declarator:i 									{: Logger.print("279 " + i); RESULT = i; :} 
+	| init_declarator_list:il COMMA init_declarator:id		{: Logger.print("280 " + il + " " + id); RESULT = il; :} 
+	;
+
+init_declarator
+	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var; Semantic.getInstance().generateSTCode(var); :}
+	| declarator:d										{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
+	;
+
+storage_class_specifier
+	::= TYPEDEF	/* identifiers must be flagged as TYPEDEF_NAME */
+	| EXTERN
+	| STATIC
+	| THREAD_LOCAL
+	| AUTO
+	| REGISTER
+	;
+
+type_specifier
+	::= VOID	{: RESULT = new Type("void"); 			Logger.print("void"); :}
+	| CHAR		{: RESULT = new Type("char"); 			Logger.print("char"); :}
+	| SHORT		{: RESULT = new Type("short"); 			Logger.print("short"); :}	
+	| INT		{: RESULT = new Type("int"); 			Logger.print("int"); :}
+	| LONG		{: RESULT = new Type("long"); 			Logger.print("long"); :}
+	| FLOAT		{: RESULT = new Type("float"); 			Logger.print("float"); :}
+	| DOUBLE	{: RESULT = new Type("double"); 		Logger.print("double"); :}
+	| SIGNED	{: RESULT = new Type("signed"); 		Logger.print("signed"); :}
+	| UNSIGNED	{: RESULT = new Type("unsigned"); 		Logger.print("unsigned"); :}
+	| BOOL		{: RESULT = new Type("bool"); 			Logger.print("bool"); :}
+	| COMPLEX	{: RESULT = new Type("complex"); 		Logger.print("complex"); :}
+	| IMAGINARY	  	/* non-mandated extension */
+	| atomic_type_specifier
+	| struct_or_union_specifier
+	| enum_specifier
+	| TYPEDEF_NAME		/* after it has been defined as such */
+	;
+
+struct_or_union_specifier
+	::= struct_or_union LBRK struct_declaration_list RBRK
+	| struct_or_union IDENTIFIER LBRK struct_declaration_list RBRK
+	| struct_or_union IDENTIFIER
+	;
+
+struct_or_union
+	::= STRUCT
+	| UNION
+	;
+
+struct_declaration_list
+	::= struct_declaration
+	| struct_declaration_list struct_declaration
+	;
+
+struct_declaration
+	::= specifier_qualifier_list SEMICOLON	/* for anonymous struct/union */
+	| specifier_qualifier_list struct_declarator_list SEMICOLON
+	| static_assert_declaration
+	;
+
+specifier_qualifier_list
+	::= type_specifier specifier_qualifier_list
+	| type_specifier
+	| type_qualifier specifier_qualifier_list
+	| type_qualifier
+	;
+
+struct_declarator_list
+	::= struct_declarator
+	| struct_declarator_list COMMA struct_declarator
+	;
+
+struct_declarator
+	::= COLON constant_expression
+	| declarator COLON constant_expression
+	| declarator
+	;
+
+enum_specifier
+	::= ENUM LBRK enumerator_list RBRK
+	| ENUM LBRK enumerator_list COMMA RBRK
+	| ENUM IDENTIFIER LBRK enumerator_list RBRK
+	| ENUM IDENTIFIER LBRK enumerator_list COMMA RBRK
+	| ENUM IDENTIFIER
+	;
+
+enumerator_list
+	::= enumerator
+	| enumerator_list COMMA enumerator
+	;
+
+enumerator	/* identifiers must be flagged as ENUMERATION_CONSTANT */
+	::= enumeration_constant ASSIGNMENT constant_expression
+	| enumeration_constant
+	;
+
+atomic_type_specifier
+	::= ATOMIC LPAR type_name RPAR
+	;
+
+type_qualifier
+	::= CONST
+	| RESTRICT
+	| VOLATILE
+	| ATOMIC
+	;
+
+function_specifier
+	::= INLINE
+	| NORETURN
+	;
+
+alignment_specifier
+	::= ALIGNAS LPAR type_name RPAR
+	| ALIGNAS LPAR constant_expression RPAR
+	;
+
+declarator
+	::= pointer direct_declarator:p 					{: Logger.print("396 direct_declarator: " + p ); RESULT = p; :}
+	| direct_declarator:d								{: Logger.print("397 direct_declarator: " + d ); RESULT = d; :}
+	;
+
+direct_declarator
+	::= IDENTIFIER:d																				{: Logger.print("401 IDENTIFIER " + d ); RESULT = d; :}
+	| LPAR declarator RPAR
+	| direct_declarator LSQRBRK RSQRBRK
+	| direct_declarator LSQRBRK STAR RSQRBRK
+	| direct_declarator LSQRBRK STATIC type_qualifier_list assignment_expression RSQRBRK
+	| direct_declarator LSQRBRK STATIC assignment_expression RSQRBRK
+	| direct_declarator LSQRBRK type_qualifier_list STAR RSQRBRK
+	| direct_declarator LSQRBRK type_qualifier_list STATIC assignment_expression RSQRBRK
+	| direct_declarator LSQRBRK type_qualifier_list assignment_expression RSQRBRK
+	| direct_declarator LSQRBRK type_qualifier_list RSQRBRK
+	| direct_declarator LSQRBRK assignment_expression RSQRBRK
+	| direct_declarator:d LPAR parameter_type_list:p RPAR											{: Logger.print("412 direct_declarator " + d ); RESULT = new Function(d.toString(), (ArrayList<Parameter>) p); :}
+	| direct_declarator:d LPAR RPAR																	{: Logger.print("413 direct_declarator " + d ); RESULT = new Function(d.toString(), new ArrayList<Parameter>()); :}
+	| direct_declarator LPAR identifier_list RPAR													{: Logger.print("414 direct_declarator"); :}
+	;
+
+pointer
+	::= STAR type_qualifier_list pointer
+	| STAR type_qualifier_list
+	| STAR pointer
+	| STAR
+	;
+
+type_qualifier_list
+	::= type_qualifier
+	| type_qualifier_list type_qualifier
+	;
+
+
+parameter_type_list
+	::= parameter_list COMMA ELLIPSIS
+	| parameter_list: pl 											{: Logger.print("432 parameter_list " + pl ); RESULT = pl; :}														
+	;
+
+parameter_list
+	::= parameter_declaration:pd 									{: Logger.print("436 parameter_declaration: " + pd); RESULT = Util.newList( (Parameter) pd ); :} 	
+	| parameter_list:pl COMMA parameter_declaration:pd				{: Logger.print("437 parameter_list: " + pl + " parameter_declaration: " + pd); ((ArrayList<Parameter>) pl).add((Parameter)pd); RESULT = pl;:}
+	;
+
+parameter_declaration
+	::= declaration_specifiers:ds declarator:de						{: Logger.print("441 declaration_specifiers: " + ds + " declarator: " + de); Variable v = new Variable(de.toString(), (Type) ds); RESULT = v; :}
+	| declaration_specifiers abstract_declarator
+	| declaration_specifiers
+	;
+
+identifier_list
+	::= IDENTIFIER
+	| identifier_list COMMA IDENTIFIER
+	;
+
+type_name
+	::= specifier_qualifier_list abstract_declarator
+	| specifier_qualifier_list
+	;
+
+abstract_declarator
+	::= pointer direct_abstract_declarator
+	| pointer
+	| direct_abstract_declarator
+	;
+
+direct_abstract_declarator
+	::= LPAR abstract_declarator RPAR
+	| LSQRBRK RSQRBRK
+	| LSQRBRK STAR RSQRBRK
+	| LSQRBRK STATIC type_qualifier_list assignment_expression RSQRBRK
+	| LSQRBRK STATIC assignment_expression RSQRBRK
+	| LSQRBRK type_qualifier_list STATIC assignment_expression RSQRBRK
+	| LSQRBRK type_qualifier_list assignment_expression RSQRBRK
+	| LSQRBRK type_qualifier_list RSQRBRK
+	| LSQRBRK assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK RSQRBRK
+	| direct_abstract_declarator LSQRBRK STAR RSQRBRK
+	| direct_abstract_declarator LSQRBRK STATIC type_qualifier_list assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK STATIC assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK type_qualifier_list assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK type_qualifier_list STATIC assignment_expression RSQRBRK
+	| direct_abstract_declarator LSQRBRK type_qualifier_list RSQRBRK
+	| direct_abstract_declarator LSQRBRK assignment_expression RSQRBRK
+	| LPAR RPAR
+	| LPAR parameter_type_list RPAR
+	| direct_abstract_declarator LPAR RPAR
+	| direct_abstract_declarator LPAR parameter_type_list RPAR
+	;
+
+initializer
+	::= LBRK initializer_list RBRK
+	| LBRK initializer_list COMMA RBRK
+	| assignment_expression:a					{: Logger.print("489 assignment_expression: " + a); RESULT = a; :}
+	;
+
+initializer_list
+	::= designation initializer
+	| initializer:i												{: Logger.print("494 initializer: " + i); RESULT = Util.newList((Expression) i); :}
+	| initializer_list COMMA designation initializer			{: Logger.print("495"); :}
+	| initializer_list:il COMMA initializer:i					{: Logger.print("496 initializer_list: " + il + " initializer: " + i); ((ArrayList<Expression>) il).add((Expression)i); RESULT = il; :}
+	;
+
+designation
+	::= designator_list ASSIGNMENT
+	;
+
+designator_list
+	::= designator
+	| designator_list designator
+	;
+
+designator
+	::= LSQRBRK constant_expression RSQRBRK
+	| DOT IDENTIFIER
+	;
+
+static_assert_declaration
+	::= STATIC_ASSERT LPAR constant_expression COMMA STRING_LITERAL RPAR SEMICOLON  {: Logger.print("514"); :}
+	;
+
+statement
+	::= labeled_statement:s									{: RESULT = s; Logger.print("518 labeled_statement: " + s); :}
+	| compound_statement:s									{: RESULT = s; Logger.print("519 compound_statement: " + s); :}
+	| expression_statement:s								{: RESULT = s; Logger.print("520 expression_statement: " + s); :}	
+	| selection_statement:s									{: RESULT = s; Logger.print("521 " + s); :}	
+	| iteration_statement:s									{: RESULT = s; Logger.print("522 " + s); :}
+	| jump_statement:s										{: RESULT = s; Logger.print("523 jump_statement:" + s); :}
+	;
+
+labeled_statement
+	::= IDENTIFIER:i COLON statement:s						{: Logger.print("527 IDENTIFIER: " + i + " statement: " + s); RESULT = s; :}
+	| CASE constant_expression:ce COLON statement:s 		{: Logger.print("528 constant_expression: " + ce + " statement: " + s); RESULT = s; Semantic.getInstance().addCaseToSwitch((Expression) ce); :}
+	| DEFAULT:d COLON statement:s							{: Logger.print("529 DEFAULT: " + d + " statement: " + s); RESULT = s; :}
+	;
+
+compound_statement
+	::= LBRK RBRK
+	| LBRK  block_item_list:bi RBRK 						{: RESULT = bi;  Logger.print("534 block_item_list: " + bi);:} 
+	;
+
+block_item_list
+	::= block_item:bi										{: RESULT = bi;  Logger.print("538 block_item: " + bi);:}
+	| block_item_list:bl block_item:bi						{: RESULT = bi;  Logger.print("539 block_item: " + bi);:}
+	;
+
+block_item
+	::= declaration:d 										{: RESULT = d;  Logger.print("543 declaration: " + d);:}
+	| statement:s											{: RESULT = s;  Logger.print("544 statement: " + s);:}
+	;
+
+expression_statement
+	::= SEMICOLON							{: Logger.print("548 expression_statement"); :}
+	| expression SEMICOLON					{: Logger.print("549 expression_statement"); :}
+	;
+
+selection_statement
+	::= IF LPAR expression RPAR statement ELSE statement
+	| IF LPAR expression RPAR statement
+	| SWITCH LPAR expression:e RPAR statement:s						{: Logger.print("555 expression: " + e + " statement: " + s); Semantic.getInstance().checkSwitchCase((Expression) e);:}
+	;
+
+iteration_statement
+	::= WHILE LPAR expression RPAR statement
+	| DO statement WHILE LPAR expression RPAR SEMICOLON
+	| FOR LPAR expression_statement expression_statement RPAR statement					{: Logger.print("561 FOR ITERATOR"); :}
+	| FOR LPAR expression_statement expression_statement expression RPAR statement		{: Logger.print("562 FOR ITERATOR"); :}
+	| FOR LPAR declaration expression_statement RPAR statement							{: Logger.print("563 FOR ITERATOR"); :}
+	| FOR LPAR declaration expression_statement expression RPAR statement				{: Logger.print("564 FOR ITERATOR"); :}
+	;
+
+jump_statement
+	::= GOTO IDENTIFIER SEMICOLON
+	| CONTINUE SEMICOLON					{: Logger.print("569 CONTINUE ;"); :} 
+	| BREAK SEMICOLON						{: Logger.print("570 BREAK ;"); :}
+	| RETURN SEMICOLON						{: Logger.print("571 BREAK ;"); :}
+	| RETURN expression:e SEMICOLON			{: Logger.print("572 RETURN EXPRESSION: " + e); Semantic.getInstance().checkReturnedType(e); RESULT = e; :}
+	;
+
+translation_unit
+	::= external_declaration 						{: Logger.print("573 translationUnit"); :}
+	| translation_unit external_declaration			{: Logger.print("574 translationUnit"); :}
+	;
+
+external_declaration
+	::= function_definition
+	| declaration
+	;
+
+function_definition
+	::= declaration_specifiers declarator declaration_list compound_statement
+	| declaration_specifiers:d declarator:de {: Logger.print("587 declaration_specifiers: " + d + " declarator: " + de); ((Function) de).setReturnType((Type) d); Semantic.getInstance().addFunctionAndNewScope((Function) de); :} compound_statement:cs {: Logger.print("587 compound_statement: " + d + " " + cs);  Semantic.getInstance().exitCurrentScope(); :}
+	;
+
+declaration_list
+	::= declaration
+	| declaration_list declaration
+	;

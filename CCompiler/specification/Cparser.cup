@@ -44,7 +44,7 @@ parser code {:
  * Terminals
  */
  
-terminal	IDENTIFIER, I_CONSTANT, F_CONSTANT, STRING_LITERAL, FUNC_NAME, SIZEOF;
+terminal	IDENTIFIER, I_CONSTANT, F_CONSTANT,C_CONSTANT, STRING_LITERAL, FUNC_NAME, SIZEOF;
 terminal	PTR_OP, INC_OP, DEC_OP, LEFT_OP, RIGHT_OP, LE_OP, GE_OP, EQ_OP, NE_OP;
 terminal	AND_OP, OR_OP, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN, ADD_ASSIGN;
 terminal	SUB_ASSIGN, LEFT_ASSIGN, RIGHT_ASSIGN, AND_ASSIGN;
@@ -96,7 +96,8 @@ primary_expression
 
 constant
 	::= I_CONSTANT:i				{: Logger.print("98 I_CONSTANT: " + i); RESULT = new Expression(new Type("int"), i.toString()); :}
-	| F_CONSTANT:f					{: Logger.print("99 F_CONSTANT: " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
+	| C_CONSTANT:c				{:Logger.print("99 C_CONSTANT: " + c); RESULT = new Expression(new Type("char"), c.toString()); :}
+	| F_CONSTANT:f					{: Logger.print("100 F_CONSTANT: " + f); RESULT = new Expression(new Type("float"), f.toString()); :}
 	| ENUMERATION_CONSTANT	/* after it has been defined as such */
 	;
 
@@ -295,7 +296,7 @@ storage_class_specifier
 	;
 
 type_specifier
-	::= VOID
+	::= VOID	{: RESULT = new Type("void"); 			Logger.print("void"); :}
 	| CHAR		{: RESULT = new Type("char"); 			Logger.print("char"); :}
 	| SHORT		{: RESULT = new Type("short"); 			Logger.print("short"); :}	
 	| INT		{: RESULT = new Type("int"); 			Logger.print("int"); :}

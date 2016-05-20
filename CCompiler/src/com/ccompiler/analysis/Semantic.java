@@ -91,7 +91,7 @@ public class Semantic {
 	
 	public void addVariable(Variable v) {
 		if (checkVariableNameCurrentScope(v.getName()))
-			throw new SemanticException("Variable name already exists");
+			throw new SemanticException("Variable "+ v.getName() +  " already exists");
 		
 		if (scopeStack.peek() != null) {
 			scopeStack.peek().addVariable(v);

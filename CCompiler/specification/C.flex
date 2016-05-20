@@ -134,6 +134,7 @@ BlockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 							
 	{L}{A}*					{ return symbol(Sym.IDENTIFIER, new String(yytext())); }
 	
+	'(.|\\(n|t|r))?'		{ return symbol(Sym.C_CONSTANT , new String(yytext())); }
 	{HP}{H}+{IS}?					{ return symbol(Sym.I_CONSTANT , new String(yytext())); }
 	{NZ}{D}*{IS}?					{ return symbol(Sym.I_CONSTANT , new String(yytext())); }
 	"0"{O}*{IS}?					{ return symbol(Sym.I_CONSTANT , new String(yytext())); }

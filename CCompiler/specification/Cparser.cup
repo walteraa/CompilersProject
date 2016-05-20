@@ -289,7 +289,7 @@ init_declarator_list
 	;
 
 init_declarator
-	::= declarator:d ASSIGNMENT initializer:i			{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var; Semantic.getInstance().getCodeGenerator().assignmentDeclararion((Variable) var, (Expression) i );:}
+	::= declarator:d {: Logger.print("this is executed after"); :}  ASSIGNMENT initializer:i	{:  Logger.print("284 " + d + " " + i); Variable var = new Variable(d.toString(), new Type("UNKNOWN")); RESULT = var;  Logger.print("The variable d: " + d); Semantic.getInstance().getCodeGenerator().assignmentDeclararion((Variable) var, (Expression) i );:}
 	| declarator:d										{:  Logger.print("285 " + d); RESULT = new Variable(d.toString(), new Type("UNKNOWN")); :} 
 	;
 
@@ -525,7 +525,7 @@ static_assert_declaration
 statement
 	::= labeled_statement:s									{: RESULT = s; Logger.print("518 labeled_statement: " + s); :}
 	| compound_statement:s									{: RESULT = s; Logger.print("519 compound_statement: " + s); :}
-	| expression_statement:s								{: RESULT = s; Logger.print("520 expression_statement: " + s); :}	
+	| expression_statement:s								{: Semantic.getInstance().incrementAtualScope(); RESULT = s;  Logger.print("520 expression_statement: " + s); :}	
 	| selection_statement:s									{: RESULT = s; Logger.print("521 selection_statement: " + s); :}	
 	| iteration_statement:s									{: RESULT = s; Logger.print("522 iteration_statement: " + s); :}
 	| jump_statement:s										{: RESULT = s; Logger.print("523 jump_statement:" + s); :}
@@ -533,8 +533,8 @@ statement
 
 labeled_statement
 	::= IDENTIFIER:i COLON statement:s						{: Logger.print("527 IDENTIFIER: " + i + " statement: " + s); RESULT = s; :}
-	| CASE constant_expression:ce COLON statement:s 		{: Logger.print("528 constant_expression: " + ce + " statement: " + s); RESULT = s; Semantic.getInstance().addCaseToSwitch((Expression) ce); :}
-	| DEFAULT:d COLON statement:s							{: Logger.print("529 DEFAULT: " + d + " statement: " + s); RESULT = s; :}
+	| DEFAULT:d {: Semantic.getInstance().exitCaseScope(); :} COLON {: Logger.print("536 expression: " + d + " statement: "); Semantic.getInstance().createCase(new Expression(new Type("int"))); :} statement:s							{: Logger.print("529 DEFAULT: " + d + " statement: " + s); RESULT = s; :}
+	| CASE {: Semantic.getInstance().exitCaseScope(); :} constant_expression:ce COLON {: Logger.print("536 expression: " + ce + " statement: "); Semantic.getInstance().createCase((Expression) ce); :}  statement:s 	/*{: Semantic.getInstance().exitCurrentScope(); :}*/	
 	;
 
 compound_statement
@@ -548,19 +548,19 @@ block_item_list
 	;
 
 block_item
-	::= declaration:d 										{: RESULT = d;  Logger.print("543 declaration: " + d);:}
+	::= declaration:d 										{:  RESULT = d;  Logger.print("543 declaration: " + d);:}
 	| statement:s											{: RESULT = s;  Logger.print("544 statement: " + s);:}
 	;
 
 expression_statement
 	::= SEMICOLON							{: Logger.print("548 expression_statement"); :}
-	| expression SEMICOLON					{: Logger.print("549 expression_statement"); :}
+	| expression:e SEMICOLON					{: RESULT =  e; Logger.print("549 expression_statement"); :}
 	;
 
 selection_statement
 	::= IF LPAR expression RPAR statement ELSE statement
 	| IF LPAR expression RPAR statement
-	| SWITCH LPAR expression:e RPAR statement:s						{: Logger.print("555 expression: " + e + " statement: " + s); Semantic.getInstance().checkSwitchCase((Expression) e);:}
+	| SWITCH LPAR expression:e RPAR{: Logger.print("555 expression: " + e + " statement: "); Semantic.getInstance().createSwitch((Expression) e);  Semantic.getInstance().getCodeGenerator().addSwitch((Expression) e); :} statement:s	{: Semantic.getInstance().exitCurrentScope(); :}					
 	;
 
 iteration_statement

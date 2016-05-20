@@ -1,3 +1,8 @@
+int max(float x, int y){
+	//int z = y;
+	return x;
+}
+
 int main() {
  	int num = 10;
 	int x = 0;
@@ -16,6 +21,9 @@ int main() {
         	default:
                 	x = 4 + 1;
         }
-	
+
+	//Dá erro, checa tipos de parametros: int f =  max("aaasa", '10');
+	char f = max(10, 'a');
+	int j = "Joao";
    return 0;   
 }

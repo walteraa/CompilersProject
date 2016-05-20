@@ -21,8 +21,10 @@ public class Type extends NamedEntity implements Parameter {
 		if (!(obj instanceof Type))
 			return false;
 		return getName().equals(((Type) obj).getName())
-				|| ((Type) obj).getName().equals("float") && this.getType().getName().equals("int")
-				|| ((Type) obj).getName().equals("int") && this.getType().getName().equals("float");
+				|| (((Type) obj).getName().equals("float") && this.getType().getName().equals("int"))
+				|| (((Type) obj).getName().equals("int") && this.getType().getName().equals("float"))
+				|| (((Type) obj).getName().equals("int") && this.getType().getName().equals("char"))
+				|| (((Type) obj).getName().equals("char") && this.getType().getName().equals("i"));
 	}
 
 	public Type getType() {

@@ -113,7 +113,7 @@ enumeration_constant
 	;
 
 string
-	::= STRING_LITERAL:s					{: Logger.print("108 STRING_LITERAL: " + s); RESULT = new Expression(new Type("char*"), s.toString()); :} 
+	::= STRING_LITERAL:s					{: Logger.print("108 STRING_LITERAL: " + s); RESULT = new Expression(new Type("string"), s.toString()); :} 
 	| FUNC_NAME:f							{: Logger.print("109 FUNC_NAME: " + f); :}
 	;
 

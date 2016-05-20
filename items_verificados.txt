@@ -1,0 +1,8 @@
+int max(float x, int y){
+	return x;
+}
+//Dá erro, checa tipos de parametros: int f =  max("aaasa", '10'); [ANÁLISE SEMANTICA]
+//Funciona cast automático de parâmetros float<->int e int<->char int f = max(10, 'a');
+//funciona cast automático de retorno float<->int e int<->char char(ou float) f = max(10, 'a');
+//O valor que a função deve retornar é int e ele érmite retornar o float(parametro x), cast automático
+//Se substituir x por um literal string "exemplo", deve dar erro de tipos

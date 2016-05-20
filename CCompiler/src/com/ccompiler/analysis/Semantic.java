@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import com.ccompiler.core.Case;
+import com.ccompiler.core.Default;
 import com.ccompiler.core.Expression;
 import com.ccompiler.core.Function;
 import com.ccompiler.core.Identifier;
@@ -15,6 +16,7 @@ import com.ccompiler.core.Program;
 import com.ccompiler.core.Register;
 import com.ccompiler.core.ScopedEntity;
 import com.ccompiler.core.Switch;
+import com.ccompiler.core.SwitchCase;
 import com.ccompiler.core.Type;
 import com.ccompiler.core.Variable;
 import com.ccompiler.util.SemanticException;
@@ -60,8 +62,19 @@ public class Semantic {
 		if (scoped instanceof Function)
 			((Function) scoped).validateReturnedType();
 		if(scoped instanceof Case){
-			System.out.println("GET OUT OF CASE");
-			getCodeGenerator().addCase((Case) scoped);
+			
+			
+		}
+	}
+	
+	public void putBreakInCase(){
+		if(scopeStack.peek() instanceof SwitchCase){
+			
+			System.out.println("Break find in case scope");
+			Semantic.getInstance().getCodeGenerator().addOutSwitch();
+			
+		}else{
+			System.out.println("Break find out of case scope");
 		}
 	}
 	
@@ -69,7 +82,7 @@ public class Semantic {
 		ScopedEntity scoped = scopeStack.pop();
 		if(scoped != null && scoped instanceof Case){
 			System.out.println("GET OUT OF CASE");
-			getCodeGenerator().addCase((Case) scoped);
+			//getCodeGenerator().addCase((Case) scoped);
 		}
 	}
 	
@@ -94,29 +107,46 @@ public class Semantic {
 
 	
 	public void createSwitch(Expression e){
-		createNewScope(new Switch(e));
+		createNewScope(new Switch(e,  getCodeGenerator().allocateRegister()));
+		Semantic.getInstance().getCodeGenerator().addSwitch((Switch)scopeStack.peek());
 	}
 	
 	
 	public void createCase(Expression e){
 		System.out.println("CASE CREATED");
-		createNewScope(new Case(e));
+//		if(!(scopeStack.peek() instanceof SwitchCase)){
+//			Register sentinel = getCodeGenerator().allocateRegister();
+//			createNewScope(new Case(e, sentinel));
+//		}else{
+			createNewScope(new Case(e, ((SwitchCase) scopeStack.peek()).getSentinel() ));
+		//}
+		getCodeGenerator().addCase((Case) scopeStack.peek());
+	}
+	
+	public void createDefault(Expression e){
+//		if(!(scopeStack.peek() instanceof SwitchCase)){
+//			Register sentinel = getCodeGenerator().allocateRegister();
+//			createNewScope(new Default(e, sentinel));
+//		}else{
+			createNewScope(new Default(e, ((SwitchCase) scopeStack.peek()).getSentinel() ));
+		//}
+		getCodeGenerator().addCase((Case) scopeStack.peek());
 	}
 	
 		
 	/** Switch Case Semantic */
-	private Switch switchCase = new Switch();
-
-	public void checkSwitchCase(Expression e) {
-		
-		
-		this.switchCase.setExpression(e);
-		// TODO Ruan: resetar o switch depois de analisar e gerar código
-	}
-
-	public void addCaseToSwitch(Expression e) {
-		this.switchCase.addCase(new Case(e));
-	}
+//	private Switch switchCase = new Switch();
+//
+//	public void checkSwitchCase(Expression e) {
+//		
+//		
+//		this.switchCase.setExpression(e);
+//		// TODO Ruan: resetar o switch depois de analisar e gerar código
+//	}
+//
+//	public void addCaseToSwitch(Expression e) {
+//		this.switchCase.addCase(new Case(e));
+//	}
 
 	public void addVariable(Variable v) {
 		if (checkVariableNameCurrentScope(v.getName()))

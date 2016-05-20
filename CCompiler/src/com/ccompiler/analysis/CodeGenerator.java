@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ccompiler.core.Case;
+import com.ccompiler.core.Default;
 import com.ccompiler.core.Expression;
 import com.ccompiler.core.Function;
 import com.ccompiler.core.Register;
+import com.ccompiler.core.Switch;
 import com.ccompiler.core.Type;
 import com.ccompiler.core.Variable;
 
@@ -27,7 +29,7 @@ public class CodeGenerator {
 	}
 
 	private String initAssemblyCode() {
-		return "100: LD SP, 2000\n";
+		return "100: LD SP, 4000\n";
 	}
 
 	public void assignmentDeclararion(Variable var, Object obj) {
@@ -163,14 +165,19 @@ public class CodeGenerator {
 		System.out.println("\n ############################################### \n");*/
 	}
 
-	public void addSwitch(Expression e) {
-		if (e.getAssemblyValue() != null) {
+	public void addSwitch(Switch s) {
+		if (s.getExpression().getAssemblyValue() != null) {
 			register++;
 			labels += 8;
-			addCode(labels + ": LD " + allocateRegister() + ", " + e.getAssemblyValue());
+			addCode(labels + ": LD " + s.getSentinel() + ", " + s.getExpression().getAssemblyValue());
 		}
 	}
-
+	
+	public void addOutSwitch(){
+		labels += 8;
+		addCode(labels + ": BR #switchSize");
+	}
+	
 	public void addCase(Case c) {
 		System.out.println("Size of Case:" + c.getSize());
 		register++;
@@ -178,11 +185,19 @@ public class CodeGenerator {
 		labels += 8;
 		addCode(labels + ": LD " + allocateRegister() + ", " + c.getExpression().getAssemblyValue());
 		labels += 8;
-		addCode(labels + ": SUB " + allocateRegister() + ", " + allocateRegister() + ", " + registers[register - 1]);
+		addCode(labels + ": SUB " + allocateRegister() + ", " + allocateRegister() + ", " + c.getSentinel());
 		labels += 8;
-		addCode(labels + ": BLTZ " + allocateRegister() + ", " + (labels + 8 + (8 * c.getSize())));
-		labels += 8;
-		addCode(labels + ": BGTZ " + allocateRegister() + ", " + (labels + c.getSize() * 8));
+	
+		if(c instanceof Default){
+			addCode(labels + ": BLTZ " + allocateRegister() + ", #switchSize");
+			labels += 8;
+			addCode(labels + ": BGTZ " + allocateRegister() + ", #switchSize");
+		}else{
+			addCode(labels + ": BLTZ " + allocateRegister() + ", #caseSize");
+			labels += 8;
+			addCode(labels + ": BGTZ " + allocateRegister() + ", #caseSize");
+			
+		}
 		register--;
 	}
 
@@ -227,7 +242,12 @@ public class CodeGenerator {
 		if (returnedExpression.getValue() != null) {
 			generateLDCode(returnedExpression);
 			generateSTCode(new Expression(function.getName()));
-			generateHalt();
+			
+			if(function.getName().equals("main")){
+				generateHalt();
+			} else {
+				generateBRCode(Register._SP);
+			}
 		} else {
 			if (returnedExpression.getName() != null) {
 				generateLDCode(returnedExpression);
@@ -239,7 +259,7 @@ public class CodeGenerator {
 		}
 	}
 	
-	private Register allocateRegister(){
+	public Register allocateRegister(){
 		try {
 			Register allocated = registers[register]; 
 			return allocated;

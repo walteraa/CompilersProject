@@ -249,7 +249,11 @@ public class Semantic {
 	}
 
 	public boolean checkFunctionCall(String functionName) {
-		Function f = cProgram.getFunctions().get(functionName);
+		Function f = cProgram.getFunctions().get(functionName); 
+		if(f == null)
+			System.out.println("Function name not found");
+		else
+			System.out.println("Function name was found");
 		return f != null && f.getParameterTypes().length == 0;
 	}
 
@@ -257,7 +261,7 @@ public class Semantic {
 		Function f = cProgram.getFunctions().get(functionName);
 		if (f != null && f.getParameterTypes().length == types.length) {
 			for (int i = 0; i < types.length; i++) {
-				if (!(types[i].getName().equals(f.getParameterTypes()[i].getName())))
+				if (!(types[i].equals(f.getParameterTypes()[i])))
 					return false;
 			}
 			return true;

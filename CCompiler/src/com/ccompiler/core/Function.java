@@ -69,7 +69,7 @@ public class Function extends ScopedEntity implements Identifier {
 	
 	@Override
 	public String toString() {
-		return "{ Function: " + getName() + " " + getReturnType() + " " + functionParameter + " }";
+		return "{ Function: " + getName() + " "  + " }";
 	}
 
 

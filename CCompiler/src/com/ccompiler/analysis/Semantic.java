@@ -70,11 +70,11 @@ public class Semantic {
 	public void putBreakInCase(){
 		if(scopeStack.peek() instanceof SwitchCase){
 			
-			System.out.println("Break find in case scope");
+			//System.out.println("Break find in case scope");
 			Semantic.getInstance().getCodeGenerator().addOutSwitch();
 			
 		}else{
-			System.out.println("Break find out of case scope");
+			//System.out.println("Break find out of case scope");
 		}
 	}
 	
@@ -113,7 +113,7 @@ public class Semantic {
 	
 	
 	public void createCase(Expression e){
-		System.out.println("CASE CREATED");
+		//System.out.println("CASE CREATED");
 //		if(!(scopeStack.peek() instanceof SwitchCase)){
 //			Register sentinel = getCodeGenerator().allocateRegister();
 //			createNewScope(new Case(e, sentinel));
@@ -250,10 +250,6 @@ public class Semantic {
 
 	public boolean checkFunctionCall(String functionName) {
 		Function f = cProgram.getFunctions().get(functionName); 
-		if(f == null)
-			System.out.println("Function name not found");
-		else
-			System.out.println("Function name was found");
 		return f != null && f.getParameterTypes().length == 0;
 	}
 

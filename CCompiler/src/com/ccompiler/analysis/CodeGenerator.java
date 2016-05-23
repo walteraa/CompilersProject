@@ -179,7 +179,7 @@ public class CodeGenerator {
 	}
 	
 	public void addCase(Case c) {
-		System.out.println("Size of Case:" + c.getSize());
+		//System.out.println("Size of Case:" + c.getSize());
 		register++;
 		// int startLabel = labels;
 		labels += 8;

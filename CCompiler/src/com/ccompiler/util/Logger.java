@@ -3,7 +3,7 @@ package com.ccompiler.util;
 
 public class Logger {
 	
-	private static boolean activate_log = true;
+	private static boolean activate_log = false;
 	
 	public static void print(String value) {
 		if (activate_log)
